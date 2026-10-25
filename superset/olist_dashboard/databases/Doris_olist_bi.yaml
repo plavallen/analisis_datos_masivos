@@ -1,0 +1,18 @@
+database_name: Doris olist_bi
+sqlalchemy_uri: mysql+mysqldb://root:@doris:9030/olist_bi
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_dml: false
+allow_file_upload: false
+extra:
+  metadata_params: {}
+  engine_params: {}
+  metadata_cache_timeout: {}
+  schemas_allowed_for_file_upload: []
+impersonate_user: false
+configuration_method: sqlalchemy_form
+uuid: 1b7d496e-5a28-452d-8727-71c903ac150c
+version: 1.0.0

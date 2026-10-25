@@ -1,0 +1,43 @@
+slice_name: "Rutas con m\xE1s pedidos en riesgo alto"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  datasource: 21__table
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: Pedidos
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: nivel_riesgo
+    operator: IN
+    comparator:
+    - Alto
+    - Vencido
+  x_axis: ruta
+  orientation: horizontal
+  row_limit: 8
+  order_desc: true
+  sort_x_axis: value_asc
+  show_value: true
+  show_legend: false
+  color_scheme: custom
+  label_colors:
+    Pedidos: '#B8571B'
+  x_axis_title: ''
+  y_axis_title: ''
+  y_axis_showminmax: false
+  show_extra_controls: false
+  rich_tooltip: false
+  bar_width_ratio: 0.6
+  annotation_layers: []
+query_context: '{"datasource":{"id":21,"type":"table"},"force":false,"queries":[{"filters":[{"col":"nivel_riesgo","op":"IN","val":["Alto","Vencido"]}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[{"columnType":"BASE_AXIS","sqlExpression":"ruta","label":"ruta","expressionType":"SQL","isColumnReference":true}],"metrics":[{"expressionType":"SQL","label":"Pedidos","sqlExpression":"COUNT(*)"}],"orderby":[[{"expressionType":"SQL","label":"Pedidos","sqlExpression":"COUNT(*)"},false]],"annotation_layers":[],"row_limit":8,"series_columns":[],"series_limit":0,"group_others_when_limit_reached":false,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"time_offsets":[],"post_processing":[{"operation":"pivot","options":{"index":["ruta"],"columns":[],"aggregates":{"Pedidos":{"operator":"mean"}},"drop_missing_columns":true}},{"operation":"flatten"}]}],"form_data":{"adhoc_filters":[{"clause":"WHERE","comparator":["Alto","Vencido"],"expressionType":"SIMPLE","operator":"IN","subject":"nivel_riesgo"}],"annotation_layers":[],"bar_width_ratio":0.6,"color_scheme":"custom","datasource":"21__table","groupby":[],"label_colors":{"Pedidos":"#B8571B"},"metrics":[{"expressionType":"SQL","label":"Pedidos","sqlExpression":"COUNT(*)"}],"order_desc":true,"orientation":"horizontal","rich_tooltip":false,"row_limit":8,"show_extra_controls":false,"show_legend":false,"show_value":true,"slice_id":34,"sort_x_axis":"value_asc","viz_type":"echarts_timeseries_bar","x_axis":"ruta","x_axis_title":"","y_axis_showminmax":false,"y_axis_title":"","force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 3a52bd82-093d-4b74-ad70-ed259281f0de
+version: 1.0.0
+dataset_uuid: 46c34554-d436-4f2c-bcc3-90335996c053

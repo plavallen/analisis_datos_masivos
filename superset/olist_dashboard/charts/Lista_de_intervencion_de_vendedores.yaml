@@ -1,0 +1,39 @@
+slice_name: Lista de intervencion de vendedores
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  groupby:
+  - seller_id
+  - seller_state
+  - clasificacion_embudo
+  metrics:
+  - label: Envios
+    expressionType: SQL
+    sqlExpression: SUM(n_envios)
+  - label: Tardios pct
+    expressionType: SQL
+    sqlExpression: AVG(tasa_tardios)
+  - label: Cancelados pct
+    expressionType: SQL
+    sqlExpression: AVG(tasa_cancelacion)
+  - label: "Rese\xF1as neg pct"
+    expressionType: SQL
+    sqlExpression: AVG(pct_resenas_negativas)
+  order_desc: true
+  page_length: 50
+  include_search: true
+  table_filter: true
+  conditional_formatting:
+  - colorScheme: '#FF0000'
+    column: Tardios pct
+    operator: '>'
+    targetValue: 0.15
+  datasource: 4__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 9bb6ddbb-c030-4bb2-adea-4963492d12d2
+version: 1.0.0
+dataset_uuid: 232ea2bd-d763-4684-b14e-69f563040ef4

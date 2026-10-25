@@ -1,0 +1,57 @@
+slice_name: "K09 Brecha de satisfacci\xF3n"
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    expressionType: SQL
+    sqlExpression: (SUM(CASE WHEN tarde = TRUE  AND review_negativa = TRUE  THEN 1.0
+      ELSE 0.0 END) / NULLIF(SUM(CASE WHEN tarde = TRUE  THEN 1.0 ELSE 0.0 END), 0)
+      - SUM(CASE WHEN tarde = FALSE AND review_negativa = TRUE  THEN 1.0 ELSE 0.0
+      END) / NULLIF(SUM(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END), 0)) * 100.0
+    label: K09 Brecha pp
+    hasCustomLabel: true
+  subheader: "pp de diferencia \u2014 tard\xEDos vs. a tiempo"
+  y_axis_format: .1f
+  force_timestamp_formatting: false
+  time_range: No filter
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  header_font_size: 0.4
+  subheader_font_size: 0.15
+  time_grain_sqla: null
+  datasource: 1__table
+  annotation_layers: []
+query_context: "{\"datasource\":{\"id\":1,\"type\":\"table\"},\"force\":false,\"queries\"\
+  :[{\"time_range\":\"No filter\",\"filters\":[{\"col\":\"fecha_compra\",\"op\":\"\
+  TEMPORAL_RANGE\",\"val\":\"No filter\"}],\"extras\":{\"time_grain_sqla\":null,\"\
+  having\":\"\",\"where\":\"\"},\"applied_time_extras\":{},\"columns\":[],\"metrics\"\
+  :[{\"expressionType\":\"SQL\",\"hasCustomLabel\":true,\"label\":\"K09 Brecha pp\"\
+  ,\"sqlExpression\":\"(SUM(CASE WHEN tarde = TRUE  AND review_negativa = TRUE  THEN\
+  \ 1.0 ELSE 0.0 END) / NULLIF(SUM(CASE WHEN tarde = TRUE  THEN 1.0 ELSE 0.0 END),\
+  \ 0) - SUM(CASE WHEN tarde = FALSE AND review_negativa = TRUE  THEN 1.0 ELSE 0.0\
+  \ END) / NULLIF(SUM(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END), 0)) * 100.0\"\
+  }],\"annotation_layers\":[],\"series_limit\":0,\"group_others_when_limit_reached\"\
+  :false,\"order_desc\":true,\"url_params\":{},\"custom_params\":{},\"custom_form_data\"\
+  :{}}],\"form_data\":{\"adhoc_filters\":[{\"clause\":\"WHERE\",\"comparator\":\"\
+  No filter\",\"expressionType\":\"SIMPLE\",\"operator\":\"TEMPORAL_RANGE\",\"subject\"\
+  :\"fecha_compra\"}],\"annotation_layers\":[],\"datasource\":\"1__table\",\"force_timestamp_formatting\"\
+  :false,\"header_font_size\":0.4,\"metric\":{\"expressionType\":\"SQL\",\"hasCustomLabel\"\
+  :true,\"label\":\"K09 Brecha pp\",\"sqlExpression\":\"(SUM(CASE WHEN tarde = TRUE\
+  \  AND review_negativa = TRUE  THEN 1.0 ELSE 0.0 END) / NULLIF(SUM(CASE WHEN tarde\
+  \ = TRUE  THEN 1.0 ELSE 0.0 END), 0) - SUM(CASE WHEN tarde = FALSE AND review_negativa\
+  \ = TRUE  THEN 1.0 ELSE 0.0 END) / NULLIF(SUM(CASE WHEN tarde = FALSE THEN 1.0 ELSE\
+  \ 0.0 END), 0)) * 100.0\"},\"slice_id\":3,\"subheader\":\"pp de diferencia \u2014\
+  \ tard\xEDos vs. a tiempo\",\"subheader_font_size\":0.15,\"time_grain_sqla\":null,\"\
+  time_range\":\"No filter\",\"viz_type\":\"big_number_total\",\"y_axis_format\":\"\
+  .1f\",\"force\":false,\"result_format\":\"json\",\"result_type\":\"full\"},\"result_format\"\
+  :\"json\",\"result_type\":\"full\"}"
+cache_timeout: null
+uuid: 6463da90-8305-4d11-a6d3-6791d30b5fce
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

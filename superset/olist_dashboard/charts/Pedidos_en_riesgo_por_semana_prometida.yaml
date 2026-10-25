@@ -1,0 +1,54 @@
+slice_name: Pedidos en riesgo por semana prometida
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  datasource: 21__table
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: Pedidos
+  groupby:
+  - nivel_riesgo
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: nivel_riesgo
+    operator: IN
+    comparator:
+    - Vencido
+    - Alto
+    - Medio
+  x_axis: semana_prometida
+  orientation: vertical
+  stack: Stacked
+  row_limit: 52
+  order_desc: false
+  show_value: false
+  show_legend: true
+  legendOrientation: top
+  legendType: plain
+  color_scheme: custom
+  label_colors:
+    Vencido: '#8A3A10'
+    Alto: '#B8571B'
+    Medio: '#E3A27A'
+    Bajo: '#C9CED6'
+  x_axis_title: ''
+  y_axis_title: ''
+  x_axis_time_format: Sem. %d/%m
+  x_axis_label_rotation: 45
+  y_axis_showminmax: false
+  y_axis_bounds:
+  - 0
+  - null
+  rich_tooltip: true
+  tooltipTimeFormat: Sem. %d/%m
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 15101cd3-9c29-45a7-9f13-4a19a890fa3f
+version: 1.0.0
+dataset_uuid: 46c34554-d436-4f2c-bcc3-90335996c053

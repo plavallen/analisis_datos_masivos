@@ -1,0 +1,546 @@
+tablas:
+
+  silver.geo_cep:
+    capa: silver
+    descripcion: "Centroide por prefijo postal (mediana lat/lng sobre puntos limpios de geolocation)"
+    columnas:
+      zip:
+        tipo: string
+        descripcion: "Prefijo postal de 5 dígitos normalizado"
+        origen: bronze.geolocation
+        disponible_al_comprar: true
+      n_puntos:
+        tipo: integer
+        descripcion: "Cantidad de registros usados para calcular el centroide"
+        origen: derivado
+        disponible_al_comprar: true
+      lat_med:
+        tipo: double
+        descripcion: "Latitud mediana del prefijo"
+        origen: derivado
+        disponible_al_comprar: true
+      lng_med:
+        tipo: double
+        descripcion: "Longitud mediana del prefijo"
+        origen: derivado
+        disponible_al_comprar: true
+      geo_confianza:
+        tipo: string
+        descripcion: "ok si n_puntos >= 3, baja en caso contrario"
+        origen: derivado
+        disponible_al_comprar: true
+
+  silver.orders:
+    capa: silver
+    descripcion: "Pedidos tipados con tiempos del ciclo, flags de calidad y excesos"
+    columnas:
+      order_id:
+        tipo: string
+        descripcion: "Identificador del pedido"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      customer_id:
+        tipo: string
+        descripcion: "Identificador de la dirección de entrega (no es la persona)"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      order_status:
+        tipo: string
+        descripcion: "Estado del pedido"
+        origen: bronze.orders
+        disponible_al_comprar: false
+      order_purchase_timestamp:
+        tipo: timestamp
+        descripcion: "Momento de la compra"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      order_approved_at:
+        tipo: timestamp
+        descripcion: "Momento de aprobación del pago"
+        origen: bronze.orders
+        disponible_al_comprar: false
+      order_delivered_carrier_date:
+        tipo: timestamp
+        descripcion: "Momento de entrega al transportista"
+        origen: bronze.orders
+        disponible_al_comprar: false
+      order_delivered_customer_date:
+        tipo: timestamp
+        descripcion: "Momento de entrega al cliente"
+        origen: bronze.orders
+        disponible_al_comprar: false
+      order_estimated_delivery_date:
+        tipo: timestamp
+        descripcion: "Fecha prometida de entrega"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      mes_compra:
+        tipo: string
+        descripcion: "Mes de compra en formato yyyy-MM"
+        origen: derivado
+        disponible_al_comprar: true
+      fecha_compra:
+        tipo: date
+        descripcion: "Fecha de compra (día)"
+        origen: derivado
+        disponible_al_comprar: true
+      en_periodo_util:
+        tipo: boolean
+        descripcion: "True si el pedido está en el período 2017-01 a 2018-08"
+        origen: derivado
+        disponible_al_comprar: true
+      dias_atraso:
+        tipo: integer
+        descripcion: "Diferencia en días entre entrega real y prometida (negativo = llegó antes)"
+        origen: derivado
+        disponible_al_comprar: false
+      tarde:
+        tipo: boolean
+        descripcion: "True si dias_atraso > 0"
+        origen: derivado
+        disponible_al_comprar: false
+      holgura_promesa:
+        tipo: integer
+        descripcion: "Días de adelanto respecto a la promesa (positivo = llegó antes)"
+        origen: derivado
+        disponible_al_comprar: false
+      dias_prometidos:
+        tipo: integer
+        descripcion: "Días entre compra y fecha prometida de entrega"
+        origen: derivado
+        disponible_al_comprar: true
+      t_aprobacion:
+        tipo: double
+        descripcion: "Horas entre compra y aprobación del pago"
+        origen: derivado
+        disponible_al_comprar: false
+      t_despacho:
+        tipo: double
+        descripcion: "Días entre aprobación y entrega al transportista"
+        origen: derivado
+        disponible_al_comprar: false
+      t_transito:
+        tipo: double
+        descripcion: "Días entre entrega al transportista y entrega al cliente"
+        origen: derivado
+        disponible_al_comprar: false
+      t_total:
+        tipo: double
+        descripcion: "Días entre compra y entrega al cliente"
+        origen: derivado
+        disponible_al_comprar: false
+      despacho_fuera_plazo:
+        tipo: boolean
+        descripcion: "True si el vendedor despachó después de shipping_limit_date"
+        origen: derivado
+        disponible_al_comprar: false
+      exceso_vendedor:
+        tipo: double
+        descripcion: "Días de demora atribuibles al vendedor (para tardíos)"
+        origen: derivado
+        disponible_al_comprar: false
+      exceso_transporte:
+        tipo: double
+        descripcion: "Días de demora atribuibles al transporte (para tardíos)"
+        origen: derivado
+        disponible_al_comprar: false
+      flag_aprobacion_antes_compra:
+        tipo: boolean
+        descripcion: "Inconsistencia: aprobación anterior a la compra"
+        origen: derivado
+        disponible_al_comprar: false
+      flag_despacho_antes_aprobacion:
+        tipo: boolean
+        descripcion: "Inconsistencia: despacho anterior a la aprobación"
+        origen: derivado
+        disponible_al_comprar: false
+      flag_entrega_antes_despacho:
+        tipo: boolean
+        descripcion: "Inconsistencia: entrega anterior al despacho"
+        origen: derivado
+        disponible_al_comprar: false
+      flag_entrega_antes_compra:
+        tipo: boolean
+        descripcion: "Inconsistencia: entrega anterior a la compra"
+        origen: derivado
+        disponible_al_comprar: false
+      flag_promesa_antes_compra:
+        tipo: boolean
+        descripcion: "Inconsistencia: fecha prometida anterior a la compra"
+        origen: derivado
+        disponible_al_comprar: false
+
+  silver.pedidos:
+    capa: silver
+    descripcion: "Un registro por pedido integrado con cliente, vendedor, producto, pago y reseña"
+    columnas:
+      order_id:
+        tipo: string
+        descripcion: "Identificador del pedido"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      customer_id:
+        tipo: string
+        descripcion: "Identificador de la dirección de entrega"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      customer_unique_id:
+        tipo: string
+        descripcion: "Identificador de la persona (invariante entre pedidos)"
+        origen: bronze.customers
+        disponible_al_comprar: true
+      customer_state:
+        tipo: string
+        descripcion: "UF del cliente"
+        origen: bronze.customers
+        disponible_al_comprar: true
+      customer_region:
+        tipo: string
+        descripcion: "Región del cliente (Norte, Nordeste, etc.)"
+        origen: derivado
+        disponible_al_comprar: true
+      ciudad_uf_cliente:
+        tipo: string
+        descripcion: "Ciudad canónica y UF del cliente en formato ciudad|UF"
+        origen: derivado
+        disponible_al_comprar: true
+      customer_lat:
+        tipo: double
+        descripcion: "Latitud mediana del prefijo postal del cliente"
+        origen: derivado
+        disponible_al_comprar: true
+      customer_lng:
+        tipo: double
+        descripcion: "Longitud mediana del prefijo postal del cliente"
+        origen: derivado
+        disponible_al_comprar: true
+      geo_confianza_cliente:
+        tipo: string
+        descripcion: "Confianza del centroide del cliente (ok o baja)"
+        origen: derivado
+        disponible_al_comprar: true
+      seller_id:
+        tipo: string
+        descripcion: "Vendedor principal (ítem de mayor precio)"
+        origen: bronze.order_items
+        disponible_al_comprar: true
+      multi_vendedor:
+        tipo: boolean
+        descripcion: "True si el pedido tiene items de más de un vendedor"
+        origen: derivado
+        disponible_al_comprar: true
+      n_items:
+        tipo: integer
+        descripcion: "Cantidad de ítems en el pedido"
+        origen: derivado
+        disponible_al_comprar: true
+      n_vendedores:
+        tipo: integer
+        descripcion: "Cantidad de vendedores distintos en el pedido"
+        origen: derivado
+        disponible_al_comprar: true
+      precio_total:
+        tipo: double
+        descripcion: "Suma de price de todos los ítems del pedido"
+        origen: derivado
+        disponible_al_comprar: true
+      flete_total:
+        tipo: double
+        descripcion: "Suma de freight_value de todos los ítems del pedido"
+        origen: derivado
+        disponible_al_comprar: true
+      gmv:
+        tipo: double
+        descripcion: "precio_total + flete_total"
+        origen: derivado
+        disponible_al_comprar: true
+      pago_total:
+        tipo: double
+        descripcion: "Suma de payment_value del pedido"
+        origen: bronze.order_payments
+        disponible_al_comprar: false
+      diff_pago:
+        tipo: double
+        descripcion: "pago_total - gmv (diferencia entre lo pagado y lo facturado)"
+        origen: derivado
+        disponible_al_comprar: false
+      payment_type:
+        tipo: string
+        descripcion: "Tipo del pago principal (mayor monto)"
+        origen: bronze.order_payments
+        disponible_al_comprar: true
+      categoria_principal:
+        tipo: string
+        descripcion: "Categoría en inglés del ítem de mayor precio"
+        origen: derivado
+        disponible_al_comprar: true
+      peso_medio_g:
+        tipo: double
+        descripcion: "Peso medio de los productos del pedido en gramos"
+        origen: bronze.products
+        disponible_al_comprar: true
+      volumen_medio_cm3:
+        tipo: double
+        descripcion: "Volumen medio de los productos del pedido en cm3"
+        origen: derivado
+        disponible_al_comprar: true
+      flag_peso_invalido:
+        tipo: boolean
+        descripcion: "True si algún ítem tiene peso nulo o cero"
+        origen: derivado
+        disponible_al_comprar: true
+      review_score:
+        tipo: integer
+        descripcion: "Puntaje de la reseña (1 a 5)"
+        origen: bronze.order_reviews
+        disponible_al_comprar: false
+      review_negativa:
+        tipo: boolean
+        descripcion: "True si review_score <= 2"
+        origen: derivado
+        disponible_al_comprar: false
+      resena_antes_entrega:
+        tipo: boolean
+        descripcion: "True si la reseña fue respondida antes de la entrega"
+        origen: derivado
+        disponible_al_comprar: false
+      transito_asignado:
+        tipo: double
+        descripcion: "Días de tránsito disponibles según la promesa"
+        origen: derivado
+        disponible_al_comprar: true
+
+  silver.envios:
+    capa: silver
+    descripcion: "Un registro por par order_id/seller_id con origen, destino y distancia"
+    columnas:
+      order_id:
+        tipo: string
+        descripcion: "Identificador del pedido"
+        origen: bronze.orders
+        disponible_al_comprar: true
+      seller_id:
+        tipo: string
+        descripcion: "Identificador del vendedor"
+        origen: bronze.order_items
+        disponible_al_comprar: true
+      seller_state:
+        tipo: string
+        descripcion: "UF del vendedor"
+        origen: bronze.sellers
+        disponible_al_comprar: true
+      seller_region:
+        tipo: string
+        descripcion: "Región del vendedor"
+        origen: derivado
+        disponible_al_comprar: true
+      ciudad_uf_vendedor:
+        tipo: string
+        descripcion: "Ciudad canónica y UF del vendedor en formato ciudad|UF"
+        origen: derivado
+        disponible_al_comprar: true
+      seller_lat:
+        tipo: double
+        descripcion: "Latitud mediana del prefijo postal del vendedor"
+        origen: derivado
+        disponible_al_comprar: true
+      seller_lng:
+        tipo: double
+        descripcion: "Longitud mediana del prefijo postal del vendedor"
+        origen: derivado
+        disponible_al_comprar: true
+      customer_state:
+        tipo: string
+        descripcion: "UF del cliente"
+        origen: bronze.customers
+        disponible_al_comprar: true
+      customer_region:
+        tipo: string
+        descripcion: "Región del cliente"
+        origen: derivado
+        disponible_al_comprar: true
+      ciudad_uf_cliente:
+        tipo: string
+        descripcion: "Ciudad canónica y UF del cliente en formato ciudad|UF"
+        origen: derivado
+        disponible_al_comprar: true
+      customer_lat:
+        tipo: double
+        descripcion: "Latitud mediana del prefijo postal del cliente"
+        origen: derivado
+        disponible_al_comprar: true
+      customer_lng:
+        tipo: double
+        descripcion: "Longitud mediana del prefijo postal del cliente"
+        origen: derivado
+        disponible_al_comprar: true
+      distancia_km:
+        tipo: double
+        descripcion: "Distancia Haversine entre centroide del vendedor y del cliente en km"
+        origen: derivado
+        disponible_al_comprar: true
+      distancia_calidad:
+        tipo: string
+        descripcion: "ok si ambos centroides son confiables, baja si alguno tiene pocos puntos, sin_geo si falta alguno"
+        origen: derivado
+        disponible_al_comprar: true
+      tramo_distancia:
+        tipo: string
+        descripcion: "Categoría de distancia: local, regional, nacional_media o nacional_larga"
+        origen: derivado
+        disponible_al_comprar: true
+      ruta_estado:
+        tipo: string
+        descripcion: "Ruta origen-destino en formato 'SP -> RJ'"
+        origen: derivado
+        disponible_al_comprar: true
+      ruta_ciudad:
+        tipo: string
+        descripcion: "Ruta ciudad-ciudad en formato 'ciudad|UF -> ciudad|UF'"
+        origen: derivado
+        disponible_al_comprar: true
+      intraurbana:
+        tipo: boolean
+        descripcion: "True si origen y destino son la misma ciudad|UF"
+        origen: derivado
+        disponible_al_comprar: true
+      mismo_estado:
+        tipo: boolean
+        descripcion: "True si vendedor y cliente están en la misma UF"
+        origen: derivado
+        disponible_al_comprar: true
+      n_items:
+        tipo: integer
+        descripcion: "Ítems de este vendedor en el pedido"
+        origen: derivado
+        disponible_al_comprar: true
+      precio:
+        tipo: double
+        descripcion: "Precio total de los ítems de este vendedor"
+        origen: bronze.order_items
+        disponible_al_comprar: true
+      flete:
+        tipo: double
+        descripcion: "Flete de los ítems de este vendedor"
+        origen: bronze.order_items
+        disponible_al_comprar: true
+      categoria_principal:
+        tipo: string
+        descripcion: "Categoría en inglés del ítem más caro de este vendedor"
+        origen: derivado
+        disponible_al_comprar: true
+      order_status:
+        tipo: string
+        descripcion: "Estado del pedido"
+        origen: bronze.orders
+        disponible_al_comprar: false
+      tarde:
+        tipo: boolean
+        descripcion: "True si el pedido fue entregado después de la fecha prometida"
+        origen: derivado
+        disponible_al_comprar: false
+      dias_atraso:
+        tipo: integer
+        descripcion: "Días de atraso del pedido (heredado de silver.pedidos)"
+        origen: derivado
+        disponible_al_comprar: false
+      review_score:
+        tipo: integer
+        descripcion: "Puntaje de la reseña del pedido"
+        origen: bronze.order_reviews
+        disponible_al_comprar: false
+      review_negativa:
+        tipo: boolean
+        descripcion: "True si review_score <= 2"
+        origen: derivado
+        disponible_al_comprar: false
+
+  gold.pedidos:
+    capa: gold
+    descripcion: "Copia de silver.pedidos con columnas adicionales para BI"
+    columnas:
+      uf_iso:
+        tipo: string
+        descripcion: "Código ISO del estado del cliente en formato BR-XX"
+        origen: derivado
+        disponible_al_comprar: true
+      anio_mes:
+        tipo: string
+        descripcion: "Año y mes de compra en formato yyyy-MM"
+        origen: derivado
+        disponible_al_comprar: true
+
+  gold.vendedores:
+    capa: gold
+    descripcion: "KPIs agregados por vendedor en el período útil"
+    columnas:
+      seller_id:
+        tipo: string
+        descripcion: "Identificador del vendedor"
+        origen: bronze.sellers
+        disponible_al_comprar: true
+      n_envios:
+        tipo: integer
+        descripcion: "Envíos entregados del vendedor en el período útil"
+        origen: derivado
+        disponible_al_comprar: false
+      n_tardios:
+        tipo: integer
+        descripcion: "Envíos tardíos del vendedor"
+        origen: derivado
+        disponible_al_comprar: false
+      tasa_tardios:
+        tipo: double
+        descripcion: "Proporción de envíos tardíos"
+        origen: derivado
+        disponible_al_comprar: false
+      tasa_cancelacion:
+        tipo: double
+        descripcion: "Proporción de envíos cancelados o no disponibles"
+        origen: derivado
+        disponible_al_comprar: false
+      pct_resenas_negativas:
+        tipo: double
+        descripcion: "Proporción de reseñas negativas (score <= 2)"
+        origen: derivado
+        disponible_al_comprar: false
+      p0_global:
+        tipo: double
+        descripcion: "Tasa global de tardíos del período útil (referencia del embudo)"
+        origen: derivado
+        disponible_al_comprar: false
+      limite_95_lo:
+        tipo: double
+        descripcion: "Límite inferior del 95% del embudo de control"
+        origen: derivado
+        disponible_al_comprar: false
+      limite_95_hi:
+        tipo: double
+        descripcion: "Límite superior del 95% del embudo de control"
+        origen: derivado
+        disponible_al_comprar: false
+      limite_998_hi:
+        tipo: double
+        descripcion: "Límite superior del 99.8% del embudo de control"
+        origen: derivado
+        disponible_al_comprar: false
+      clasificacion_embudo:
+        tipo: string
+        descripcion: "Posición respecto al embudo: dentro, abajo_95, arriba_95, arriba_998"
+        origen: derivado
+        disponible_al_comprar: false
+      rank_tardios:
+        tipo: integer
+        descripcion: "Posición del vendedor ordenado por cantidad de tardíos (1 = más tardíos)"
+        origen: derivado
+        disponible_al_comprar: false
+      pct_acum_vendedores:
+        tipo: double
+        descripcion: "Porcentaje acumulado de vendedores (para curva de Pareto)"
+        origen: derivado
+        disponible_al_comprar: false
+      pct_acum_tardios:
+        tipo: double
+        descripcion: "Porcentaje acumulado de tardíos (para curva de Pareto)"
+        origen: derivado
+        disponible_al_comprar: false

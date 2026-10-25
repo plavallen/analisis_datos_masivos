@@ -1,0 +1,44 @@
+slice_name: "K11 GMV del per\xEDodo"
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    expressionType: SQL
+    sqlExpression: SUM(CASE WHEN en_periodo_util = TRUE     AND order_status NOT IN
+      ('canceled','unavailable')     THEN gmv ELSE 0.0 END) / 1000000.0
+    label: K11 GMV R$ M
+    hasCustomLabel: true
+  subheader: "R$ M, pedidos no cancelados del per\xEDodo seleccionado"
+  y_axis_format: ',.1f'
+  force_timestamp_formatting: false
+  time_range: No filter
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  header_font_size: 0.4
+  subheader_font_size: 0.15
+  time_grain_sqla: null
+  datasource: 2__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 2, "type": "table"}, "force": false, "queries":
+  [{"time_range": "No filter", "granularity": "fecha_compra", "filters": [], "extras":
+  {"time_grain_sqla": "P1M", "having": "", "where": ""}, "applied_time_extras": {},
+  "columns": [], "metrics": ["K11_GMV"], "annotation_layers": [], "series_limit":
+  0, "group_others_when_limit_reached": false, "order_desc": true, "url_params": {},
+  "custom_params": {}, "custom_form_data": {}, "is_timeseries": true, "post_processing":
+  [{"operation": "pivot", "options": {"index": ["__timestamp"], "columns": [], "aggregates":
+  {"K11_GMV": {"operator": "mean"}}, "drop_missing_columns": true}}, {"operation":
+  "flatten"}]}], "form_data": {"datasource": "2__table", "granularity_sqla": "fecha_compra",
+  "metric": "K11_GMV", "show_trend_line": true, "slice_id": 5, "time_grain_sqla":
+  "P1M", "time_range": "No filter", "viz_type": "big_number", "y_axis_format": ",~g",
+  "force": false, "result_format": "json", "result_type": "full"}, "result_format":
+  "json", "result_type": "full"}'
+cache_timeout: null
+uuid: e4bbfae8-956b-49fe-8e4f-795e6c66af8b
+version: 1.0.0
+dataset_uuid: c7711f54-1cc4-4b46-9339-0e09e231b3cb

@@ -1,0 +1,48 @@
+slice_name: Concentracion de tardios por vendedor (K14)
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  groupby: []
+  time_range: No filter
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: Vendedores
+    optionName: _c_Vendedores
+  - expressionType: SQL
+    sqlExpression: MAX(pct_acum_vendedores)
+    label: '% acum. vendedores'
+    optionName: _c_%_acum._vend
+  - expressionType: SQL
+    sqlExpression: MAX(pct_acum_tardios)
+    label: "% acum. tard\xEDos (K14)"
+    optionName: _c_%_acum._tard
+  adhoc_columns:
+  - expressionType: SQL
+    sqlExpression: CASE WHEN pct_acum_vendedores <= 0.10 THEN 'Decil 1 (top 10%)'
+      WHEN pct_acum_vendedores <= 0.20 THEN 'Decil 2' WHEN pct_acum_vendedores <=
+      0.30 THEN 'Decil 3' WHEN pct_acum_vendedores <= 0.50 THEN 'Deciles 4-5' ELSE
+      'Deciles 6-10' END
+    label: decil
+  order_desc: false
+  row_limit: 10
+  datasource: 4__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 4, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "rank_tardios", "label":
+  "rank_tardios", "expressionType": "SQL", "isColumnReference": true}], "metrics":
+  [{"expressionType": "SQL", "label": "Tardios acumulados", "sqlExpression": "MAX(pct_acum_tardios)"}],
+  "annotation_layers": [], "series_limit": 0, "group_others_when_limit_reached": false,
+  "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}}],
+  "form_data": {"datasource": "4__table", "groupby": ["rank_tardios"], "metrics":
+  [{"expressionType": "SQL", "label": "Tardios acumulados", "sqlExpression": "MAX(pct_acum_tardios)"}],
+  "show_legend": true, "slice_id": 17, "viz_type": "line", "x_axis": "rank_tardios",
+  "y_axis_format": ".1%", "force": false, "result_format": "json", "result_type":
+  "full"}, "result_format": "json", "result_type": "full"}'
+cache_timeout: null
+uuid: e9a1ffe1-d881-4c9b-ba95-70225e270c17
+version: 1.0.0
+dataset_uuid: 232ea2bd-d763-4684-b14e-69f563040ef4

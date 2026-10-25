@@ -1,0 +1,53 @@
+table_name: subtitulo_descomp
+main_dttm_col: null
+currency_code_column: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: olist_bi
+sql: "SELECT\n  '{% if filter_values(\"mes\") %}{{ filter_values(\"mes\") | join(\"\
+  , \") }}{% else %}(todos los meses){% endif %}' AS \"Mes a analizar\",\n  '{% if\
+  \ filter_values(\"dimension\") %}{{ filter_values(\"dimension\") | join(\", \")\
+  \ }}{% else %}customer_state{% endif %}' AS \"Dimensi\xF3n de an\xE1lisis\"\nFROM\
+  \ olist_bi.descomposicion_mes\nLIMIT 1"
+params: null
+template_params: null
+filter_select_enabled: false
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: 0b238bc7-65f0-4828-989e-a78ae00efeb2
+metrics: []
+columns:
+- column_name: "Dimensi\xF3n de an\xE1lisis"
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: false
+  expression: null
+  description: ''
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: Mes a analizar
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: VARCHAR
+  advanced_data_type: null
+  groupby: true
+  filterable: false
+  expression: null
+  description: ''
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 1b7d496e-5a28-452d-8727-71c903ac150c

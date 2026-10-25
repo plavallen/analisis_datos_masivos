@@ -1,0 +1,58 @@
+slice_name: Tiempo por etapa del ciclo
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  x_axis: customer_region
+  metrics:
+  - expressionType: SQL
+    sqlExpression: PERCENTILE_APPROX(t_aprobacion / 24.0, 0.5)
+    label: "Aprobaci\xF3n (d\xEDas)"
+    optionName: "_c_Aprobaci\xF3n_("
+  - expressionType: SQL
+    sqlExpression: PERCENTILE_APPROX(t_despacho, 0.5)
+    label: "Despacho (d\xEDas)"
+    optionName: "_c_Despacho_(d\xED"
+  - expressionType: SQL
+    sqlExpression: PERCENTILE_APPROX(t_transito, 0.5)
+    label: "Tr\xE1nsito (d\xEDas)"
+    optionName: "_c_Tr\xE1nsito_(d\xED"
+  groupby: []
+  time_range: No filter
+  stack: Stack
+  y_axis_format: .1f
+  color_scheme: olist
+  rich_tooltip: true
+  show_legend: true
+  legendOrientation: Top
+  y_axis_title: "D\xEDas"
+  datasource: 1__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 1, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": ["customer_region"], "metrics": [{"expressionType": "SQL", "label": "Aprobacion
+  (mediana dias)", "sqlExpression": "APPROX_PERCENTILE(t_aprobacion / 24.0, 0.5)"},
+  {"expressionType": "SQL", "label": "Despacho (mediana dias)", "sqlExpression": "APPROX_PERCENTILE(t_despacho,
+  0.5)"}, {"expressionType": "SQL", "label": "Transito (mediana dias)", "sqlExpression":
+  "APPROX_PERCENTILE(t_transito, 0.5)"}], "annotation_layers": [], "series_limit":
+  0, "group_others_when_limit_reached": false, "order_desc": true, "url_params": {},
+  "custom_params": {}, "custom_form_data": {}}], "form_data": {"color_scheme": "supersetColors",
+  "datasource": "1__table", "groupby": ["customer_region"], "metrics": [{"expressionType":
+  "SQL", "label": "Aprobacion (mediana dias)", "sqlExpression": "APPROX_PERCENTILE(t_aprobacion
+  / 24.0, 0.5)"}, {"expressionType": "SQL", "label": "Despacho (mediana dias)", "sqlExpression":
+  "APPROX_PERCENTILE(t_despacho, 0.5)"}, {"expressionType": "SQL", "label": "Transito
+  (mediana dias)", "sqlExpression": "APPROX_PERCENTILE(t_transito, 0.5)"}], "slice_id":
+  12, "stacked": true, "viz_type": "bar", "y_axis_format": ".1f", "force": false,
+  "result_format": "json", "result_type": "full"}, "result_format": "json", "result_type":
+  "full"}'
+cache_timeout: null
+uuid: d4cbc082-ebe6-41d9-92bf-672ee2185619
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

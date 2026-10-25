@@ -1,0 +1,27 @@
+slice_name: Entrega a tiempo por ruta origen a destino
+description: null
+certified_by: null
+certification_details: null
+viz_type: heatmap_v2
+params:
+  x_axis: customer_state
+  groupby:
+  - seller_state
+  metric:
+    label: OTD
+    expressionType: SQL
+    sqlExpression: MAX(otd_rate)
+  legend_type: continuous
+  show_values: true
+  number_format: .1%
+  linear_color_scheme: olist_otd
+  row_limit: 1000
+  sort_x_axis: alpha_asc
+  sort_y_axis: alpha_asc
+  datasource: 20__table
+  annotation_layers: []
+query_context: '{"datasource":{"id":20,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[{"columnType":"BASE_AXIS","sqlExpression":"customer_state","label":"customer_state","expressionType":"SQL","isColumnReference":true},"seller_state"],"metrics":[{"expressionType":"SQL","label":"OTD","sqlExpression":"MAX(otd_rate)"}],"orderby":[["customer_state",true],["seller_state",true]],"annotation_layers":[],"row_limit":1000,"series_limit":0,"group_others_when_limit_reached":false,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[{"operation":"rank","options":{"metric":"OTD"}}]}],"form_data":{"annotation_layers":[],"datasource":"20__table","groupby":["seller_state"],"legend_type":"continuous","linear_color_scheme":"olist_otd","metric":{"expressionType":"SQL","label":"OTD","sqlExpression":"MAX(otd_rate)"},"number_format":".1%","row_limit":1000,"show_values":true,"slice_id":10,"sort_x_axis":"alpha_asc","sort_y_axis":"alpha_asc","viz_type":"heatmap_v2","x_axis":"customer_state","force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 7feb86ad-895b-4a7d-b61a-e873786d5742
+version: 1.0.0
+dataset_uuid: 9f7494e2-1838-4a7a-b352-031d4b803a4a

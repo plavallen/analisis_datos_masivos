@@ -1,0 +1,121 @@
+kpis:
+
+  K01:
+    nombre: "Tasa de entrega a tiempo (OTD)"
+    definicion: "Pedidos entregados con dias_atraso <= 0 sobre total entregados en periodo util"
+    sql: "AVG(CASE WHEN dias_atraso <= 0 THEN 1.0 ELSE 0.0 END)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util"
+    nota: "Incluye pedidos que llegaron exactamente en la fecha prometida"
+
+  K02:
+    nombre: "Demora media de tardios"
+    definicion: "Promedio y mediana de dias_atraso sobre pedidos tardios (dias_atraso > 0)"
+    sql: "AVG(dias_atraso), APPROX_PERCENTILE(dias_atraso, 0.5)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util con dias_atraso > 0"
+    nota: "Usar mediana para distribuciones asimétricas"
+
+  K03:
+    nombre: "Lead time total"
+    definicion: "Mediana y P90 de t_total (dias entre compra y entrega)"
+    sql: "APPROX_PERCENTILE(t_total, 0.5), APPROX_PERCENTILE(t_total, 0.9)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util"
+    nota: "Preferir mediana y P90 sobre media por asimetria de la distribucion"
+
+  K04:
+    nombre: "Tiempo de despacho del vendedor"
+    definicion: "Mediana de t_despacho (dias entre aprobacion y entrega al transportista)"
+    sql: "APPROX_PERCENTILE(t_despacho, 0.5)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util con t_despacho no nulo"
+    nota: "null cuando no hay fecha de despacho registrada"
+
+  K05:
+    nombre: "Incumplimiento del limite de despacho"
+    definicion: "Porcentaje de pedidos donde el vendedor despacho despues de shipping_limit_date"
+    sql: "AVG(CASE WHEN despacho_fuera_plazo THEN 1.0 ELSE 0.0 END)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados con despacho_fuera_plazo no nulo"
+    nota: "Excluir pedidos sin fecha de despacho registrada"
+
+  K06:
+    nombre: "Tiempo de transito"
+    definicion: "Mediana de t_transito (dias entre entrega al transportista y al cliente)"
+    sql: "APPROX_PERCENTILE(t_transito, 0.5)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util con t_transito no nulo"
+    nota: "Segmentar por ruta_estado para analisis geografico"
+
+  K07:
+    nombre: "Holgura de la promesa"
+    definicion: "Mediana de holgura_promesa (positiva = llegó antes de lo prometido)"
+    sql: "APPROX_PERCENTILE(holgura_promesa, 0.5)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util"
+    nota: "Valor positivo indica promesa conservadora; negativo indica promesa incumplida"
+
+  K08:
+    nombre: "Satisfaccion del cliente"
+    definicion: "Porcentaje de resenas negativas (score <= 2) y media del puntaje"
+    sql: "AVG(CASE WHEN review_negativa THEN 1.0 ELSE 0.0 END), AVG(review_score)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util con review_score no nulo"
+    nota: "Excluir resena_antes_entrega para evitar sesgo en analisis causales"
+
+  K09:
+    nombre: "Brecha de satisfaccion por demora"
+    definicion: "Porcentaje de resenas negativas en tardios menos porcentaje en a tiempo"
+    sql: "AVG(CASE WHEN tarde AND review_negativa THEN 1.0 ELSE 0.0 END) - AVG(CASE WHEN NOT tarde AND review_negativa THEN 1.0 ELSE 0.0 END)"
+    tabla: pedidos_entregados_periodo
+    poblacion: "Entregados en periodo util con review_score no nulo y resena_antes_entrega = false"
+    nota: "Excluir resenas antes de entrega para medicion sin sesgo de anticipacion"
+
+  K10:
+    nombre: "Tasa de cancelacion o no disponibilidad"
+    definicion: "Porcentaje de pedidos con estado canceled o unavailable sobre total"
+    sql: "AVG(CASE WHEN order_status IN ('canceled','unavailable') THEN 1.0 ELSE 0.0 END)"
+    tabla: pedidos
+    poblacion: "Todos los pedidos del periodo util"
+    nota: "Incluye todos los estados; no solo los entregados"
+
+  K11:
+    nombre: "GMV mensual y variacion mensual"
+    definicion: "Suma de precio_total + flete_total por mes y variacion porcentual respecto al mes anterior"
+    sql: "SUM(gmv)"
+    tabla: pedidos
+    poblacion: "Pedidos no cancelados ni no disponibles del periodo util"
+    nota: "Calcular variacion mensual con LAG en la vista serie_mensual"
+
+  K12:
+    nombre: "Ticket promedio (AOV)"
+    definicion: "GMV total dividido por cantidad de pedidos"
+    sql: "SUM(gmv) / COUNT(order_id)"
+    tabla: pedidos
+    poblacion: "Pedidos no cancelados ni no disponibles del periodo util"
+    nota: "Average Order Value; sensible a outliers de precio"
+
+  K13:
+    nombre: "Ratio flete sobre precio"
+    definicion: "Suma de flete_total dividida por suma de precio_total"
+    sql: "SUM(flete_total) / NULLIF(SUM(precio_total), 0)"
+    tabla: pedidos
+    poblacion: "Pedidos no cancelados ni no disponibles del periodo util"
+    nota: "Indicador de carga logistica relativa al valor del producto"
+
+  K14:
+    nombre: "Concentracion de demoras"
+    definicion: "Porcentaje de tardios explicado por el 10% de vendedores con mas tardios"
+    sql: "SUM(CASE WHEN pct_acum_vendedores <= 0.1 THEN n_tardios ELSE 0 END) / SUM(n_tardios)"
+    tabla: vendedores
+    poblacion: "Vendedores del periodo util con al menos un envio"
+    nota: "Curva de Pareto; calcular desde gold.vendedores con rank_tardios"
+
+  K15:
+    nombre: "Tasa de recompra"
+    definicion: "Clientes con 2 o mas pedidos sobre clientes unicos totales"
+    sql: "AVG(CASE WHEN tiene_recompra THEN 1.0 ELSE 0.0 END)"
+    tabla: clientes
+    poblacion: "Todos los clientes del periodo completo (no filtrar por mes)"
+    nota: "Usar customer_unique_id, no customer_id; no responde a filtros de mes"

@@ -1,0 +1,37 @@
+slice_name: "Lead time por region (P50 y P90, d\xEDas)"
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  x_axis: customer_region
+  metrics:
+  - expressionType: SQL
+    sqlExpression: PERCENTILE_APPROX(t_total, 0.5)
+    label: P50 (mediana)
+    optionName: _c_P50_(mediana
+  - expressionType: SQL
+    sqlExpression: PERCENTILE_APPROX(t_total, 0.9)
+    label: P90
+    optionName: _c_P90
+  groupby: []
+  time_range: No filter
+  y_axis_format: .1f
+  color_scheme: olist
+  rich_tooltip: true
+  show_legend: true
+  legendOrientation: Top
+  y_axis_title: "D\xEDas totales"
+  datasource: 1__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 9b269bd0-2a0f-4f50-bfa5-fa5a49b61db5
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

@@ -1,0 +1,77 @@
+# Agrupamientos fijos de variables categóricas.
+# Se aplican antes de AgruparRaras en el Pipeline.
+# Fuente: diagnósticos del paso 6 y conocimiento del dominio.
+
+columnas:
+
+  # Estados con pocos eventos: agrupados por region geografica de Brasil.
+  # Regiones oficiales del IBGE.
+  customer_state:
+    AC: Norte
+    AP: Norte
+    AM: Norte
+    PA: Norte
+    RO: Norte
+    RR: Norte
+    TO: Norte
+    AL: Nordeste
+    BA: Nordeste
+    CE: Nordeste
+    MA: Nordeste
+    PB: Nordeste
+    PE: Nordeste
+    PI: Nordeste
+    RN: Nordeste
+    SE: Nordeste
+    DF: Centro-Oeste
+    GO: Centro-Oeste
+    MS: Centro-Oeste
+    MT: Centro-Oeste
+    ES: Sudeste
+    MG: Sudeste
+    RJ: Sudeste
+    SP: Sudeste
+    PR: Sul
+    RS: Sul
+    SC: Sul
+
+  seller_state_critico:
+    # Misma logica: estados con pocos eventos de vendedores se agrupan por region.
+    # Se mantienen SP y SC (mayor volumen) como categorias propias.
+    AC: Norte
+    AP: Norte
+    AM: Norte
+    PA: Norte
+    RO: Norte
+    RR: Norte
+    TO: Norte
+    AL: Nordeste
+    BA: Nordeste
+    CE: Nordeste
+    MA: Nordeste
+    PB: Nordeste
+    PE: Nordeste
+    PI: Nordeste
+    RN: Nordeste
+    SE: Nordeste
+    DF: Centro-Oeste
+    GO: Centro-Oeste
+    MS: Centro-Oeste
+    MT: Centro-Oeste
+    ES: Sudeste
+    MG: Sudeste
+    RJ: Sudeste
+    PR: Sul
+    RS: Sul
+
+  # Categorias de producto agrupadas por familia (prefijo del nombre).
+  # Se corrigen errores de tipeo de Olist.
+  categoria_principal:
+    costruction_tools_tools: construction_tools
+    costruction_tools_safety: construction_tools
+    costruction_tools_lights: construction_tools
+    fashio_female_clothing: fashion_female_clothing
+    pc_gamer: computers_accessories
+    drinks: food_drink
+    food: food_drink
+    la_cuisine: food_drink

@@ -1,0 +1,54 @@
+slice_name: Entrega a tiempo por tramo de distancia
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  x_axis: tramo_distancia
+  metrics:
+  - expressionType: SQL
+    sqlExpression: AVG(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END)
+    label: OTD
+    optionName: _c_OTD
+  groupby: []
+  time_range: No filter
+  y_axis_format: .1%
+  color_scheme: olist
+  rich_tooltip: true
+  show_legend: false
+  orient: horizontal
+  y_axis_title: OTD
+  datasource: 3__table
+  annotation_layers: []
+  granularity_sqla: fecha_mes
+  time_grain_sqla: P1M
+  adhoc_filters:
+  - clause: WHERE
+    subject: fecha_mes
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+    expressionType: SIMPLE
+query_context: '{"datasource": {"id": 3, "type": "table"}, "force": false, "queries":
+  [{"time_range": "No filter", "filters": [], "extras": {"having": "", "where": ""},
+  "applied_time_extras": {}, "columns": [{"columnType": "BASE_AXIS", "sqlExpression":
+  "tramo_distancia", "label": "tramo_distancia", "expressionType": "SQL", "isColumnReference":
+  true}], "metrics": [{"expressionType": "SQL", "label": "OTD", "optionName": "_c_OTD",
+  "sqlExpression": "AVG(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END)"}], "orderby":
+  [[{"expressionType": "SQL", "label": "OTD", "optionName": "_c_OTD", "sqlExpression":
+  "AVG(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END)"}, false]], "annotation_layers":
+  [], "series_columns": [], "series_limit": 0, "group_others_when_limit_reached":
+  false, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data":
+  {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index":
+  ["tramo_distancia"], "columns": [], "aggregates": {"OTD": {"operator": "mean"}},
+  "drop_missing_columns": true}}, {"operation": "flatten"}]}], "form_data": {"color_scheme":
+  "olist", "datasource": "3__table", "groupby": [], "metrics": [{"expressionType":
+  "SQL", "label": "OTD", "optionName": "_c_OTD", "sqlExpression": "AVG(CASE WHEN tarde
+  = FALSE THEN 1.0 ELSE 0.0 END)"}], "orient": "horizontal", "rich_tooltip": true,
+  "show_legend": false, "slice_id": 11, "time_range": "No filter", "viz_type": "echarts_timeseries_bar",
+  "x_axis": "tramo_distancia", "y_axis_format": ".1%", "y_axis_title": "OTD", "force":
+  false, "result_format": "json", "result_type": "full"}, "result_format": "json",
+  "result_type": "full"}'
+cache_timeout: null
+uuid: d2246092-64fc-4d60-829b-7db485d7e903
+version: 1.0.0
+dataset_uuid: b09af493-a91c-4800-b921-5b4d4c651a94

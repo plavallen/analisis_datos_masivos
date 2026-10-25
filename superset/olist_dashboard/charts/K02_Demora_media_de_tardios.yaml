@@ -1,0 +1,45 @@
+slice_name: "K02 Demora media de tard\xEDos"
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    expressionType: SQL
+    sqlExpression: AVG(CASE WHEN dias_atraso > 0 THEN dias_atraso ELSE NULL END)
+    label: "K02 Demora d\xEDas"
+    hasCustomLabel: true
+  subheader: "D\xEDas, solo tard\xEDos del per\xEDodo seleccionado"
+  y_axis_format: .1f
+  force_timestamp_formatting: false
+  time_range: No filter
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  header_font_size: 0.4
+  subheader_font_size: 0.15
+  time_grain_sqla: null
+  datasource: 1__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 1, "type": "table"}, "force": false, "queries":
+  [{"time_range": "No filter", "filters": [], "extras": {"time_grain_sqla": null,
+  "having": "", "where": ""}, "applied_time_extras": {}, "columns": [], "metrics":
+  [{"expressionType": "SQL", "hasCustomLabel": true, "label": "K02 Demora d\u00edas",
+  "sqlExpression": "AVG(CASE WHEN dias_atraso > 0 THEN dias_atraso ELSE NULL END)"}],
+  "annotation_layers": [], "series_limit": 0, "group_others_when_limit_reached": false,
+  "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}}],
+  "form_data": {"adhoc_filters": [], "datasource": "1__table", "force_timestamp_formatting":
+  false, "header_font_size": 0.4, "metric": {"expressionType": "SQL", "hasCustomLabel":
+  true, "label": "K02 Demora d\u00edas", "sqlExpression": "AVG(CASE WHEN dias_atraso
+  > 0 THEN dias_atraso ELSE NULL END)"}, "slice_id": 6, "subheader": "d\u00edas \u2014
+  solo tard\u00edos del per\u00edodo \u00fatil", "subheader_font_size": 0.15, "time_grain_sqla":
+  null, "time_range": "No filter", "viz_type": "big_number_total", "y_axis_format":
+  ".1f", "force": false, "result_format": "json", "result_type": "full"}, "result_format":
+  "json", "result_type": "full"}'
+cache_timeout: null
+uuid: 78f42fc0-c12e-4b3b-9867-117c2c866e2f
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

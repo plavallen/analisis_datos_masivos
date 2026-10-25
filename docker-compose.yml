@@ -1,0 +1,182 @@
+name: olist
+
+# ── Redes ──────────────────────────────────────────────────────────────────────
+networks:
+  olist_net:
+    driver: bridge
+
+# ── Volúmenes ──────────────────────────────────────────────────────────────────
+volumes:
+  rustfs_data:
+  doris_fe_meta:
+  doris_be_data:
+  superset_home:
+  mlflow_artifacts:
+
+services:
+
+  # ── RustFS (S3-compatible) ─────────────────────────────────────────────────
+  rustfs:
+    image: rustfs/rustfs@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c
+    container_name: olist-rustfs
+    networks: [olist_net]
+    ports:
+      - "9002:9000"   # API S3
+      - "9003:9001"   # consola web
+    volumes:
+      - rustfs_data:/data
+    environment:
+      RUSTFS_VOLUMES:    /data
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+
+  rustfs-init:
+    image: amazon/aws-cli:2.37.12
+    container_name: olist-rustfs-init
+    networks: [olist_net]
+    depends_on: [rustfs]
+    environment:
+      AWS_ACCESS_KEY_ID:     ${RUSTFS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY}
+      AWS_DEFAULT_REGION:    us-east-1
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo 'Esperando RustFS...';
+        until aws s3api list-buckets --endpoint-url http://rustfs:9000 --no-cli-pager > /dev/null 2>&1; do
+          sleep 2;
+        done;
+        aws s3api create-bucket --bucket olist --endpoint-url http://rustfs:9000 --region us-east-1 --no-cli-pager 2>/dev/null || echo 'bucket ya existe';
+        echo 'bucket olist listo';
+    restart: "no"
+
+  # ── Spark cluster ─────────────────────────────────────────────────────────
+  spark-master:
+    image: apache/spark:4.1.3-python3
+    container_name: olist-spark-master
+    networks: [olist_net]
+    ports:
+      - "8083:8080"   # UI master
+      - "7078:7077"   # puerto cluster
+    volumes:
+      - ./jars:/opt/spark/extra-jars:ro
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+
+  spark-worker:
+    image: apache/spark:4.1.3-python3
+    container_name: olist-spark-worker
+    networks: [olist_net]
+    depends_on: [spark-master]
+    ports:
+      - "8084:8081"
+    volumes:
+      - ./jars:/opt/spark/extra-jars:ro
+    environment:
+      SPARK_WORKER_MEMORY: 4g
+      SPARK_WORKER_CORES:  2
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker",
+              "spark://spark-master:7077"]
+
+  # ── Apache Doris (FE + BE all-in-one) ────────────────────────────────────
+  doris:
+    image: apache/doris:doris-all-in-one-2.1.0
+    container_name: olist-doris
+    networks: [olist_net]
+    ports:
+      - "9030:9030"   # FE MySQL
+      - "8030:8030"   # FE HTTP
+    volumes:
+      - doris_fe_meta:/opt/apache-doris/fe/doris-meta
+      - doris_be_data:/opt/apache-doris/be/storage
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "127.0.0.1", "-P", "9030", "-uroot", "--connect-timeout=3", "-e", "SELECT 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+
+  # ── Apache Superset ───────────────────────────────────────────────────────
+  superset:
+    image: apache/superset:latest
+    container_name: olist-superset
+    networks: [olist_net]
+    depends_on:
+      doris:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset_home:/app/superset_home
+      - ./docker/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./:/repo:ro
+    environment:
+      SUPERSET_SECRET_KEY:  ${SUPERSET_SECRET_KEY:-olist-superset-secret-change-in-prod}
+      SUPERSET_ADMIN_USER:  ${SUPERSET_ADMIN_USER:-admin}
+      SUPERSET_ADMIN_PASS:  ${SUPERSET_ADMIN_PASS:-admin}
+      SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@olist.local}
+      MAPBOX_API_KEY:       ${MAPBOX_API_KEY:-}
+      DORIS_HOST:           doris
+      DORIS_PORT:           9030
+      DORIS_DB:             olist_bi
+      DORIS_USER:           ${DORIS_SUPERSET_USER:-superset_ro}
+      DORIS_PASS:           ${DORIS_SUPERSET_PASS:-}
+    command: >-
+      /bin/sh -c "pip3 install --quiet pymysql 2>/dev/null || true &&
+      superset db upgrade &&
+      superset fab create-admin
+        --username $${SUPERSET_ADMIN_USER:-admin}
+        --firstname Admin --lastname Admin
+        --email $${SUPERSET_ADMIN_EMAIL:-admin@olist.local}
+        --password $${SUPERSET_ADMIN_PASS:-admin} 2>/dev/null || true &&
+      superset init &&
+      superset run -h 0.0.0.0 -p 8088"
+
+  # ── MLflow Tracking Server ────────────────────────────────────────────────
+  mlflow:
+    image: jupyter/pyspark-notebook:latest
+    container_name: olist-mlflow
+    networks: [olist_net]
+    ports:
+      - "5050:5001"
+    environment:
+      MLFLOW_S3_ENDPOINT_URL:  http://rustfs:9000
+      MLFLOW_S3_IGNORE_TLS:    "true"
+      AWS_ACCESS_KEY_ID:       ${RUSTFS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY:   ${RUSTFS_SECRET_KEY}
+      AWS_DEFAULT_REGION:      us-east-1
+      POSTGRES_USER:           ${POSTGRES_USER}
+      POSTGRES_PASSWORD:       ${POSTGRES_PASSWORD}
+    depends_on: [rustfs]
+    volumes:
+      - ./docker/mlflow/proxy.py:/opt/mlflow_proxy.py:ro
+      - ./docker/mlflow/start.sh:/opt/mlflow_start.sh:ro
+    command: bash /opt/mlflow_start.sh
+    restart: on-failure:3
+
+  # ── JupyterLab ────────────────────────────────────────────────────────────
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    container_name: olist-jupyter
+    networks: [olist_net]
+    depends_on: [spark-master, rustfs]
+    ports:
+      - "8889:8888"   # JupyterLab
+      - "4042:4040"   # Spark UI del driver
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./jars:/opt/spark/extra-jars:ro
+      - ./data/raw:/data/raw:ro
+      - ./:/repo:ro
+    environment:
+      AWS_ACCESS_KEY_ID:      ${RUSTFS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY:  ${RUSTFS_SECRET_KEY}
+      RUSTFS_ENDPOINT:        http://rustfs:9000
+      MLFLOW_TRACKING_URI:    http://mlflow:5001
+      MLFLOW_S3_ENDPOINT_URL: http://rustfs:9000
+      MLFLOW_S3_IGNORE_TLS:   "true"
+      SPARK_CLASSPATH: "/opt/spark/extra-jars/hadoop-aws-3.4.2.jar:/opt/spark/extra-jars/aws-sdk-bundle-v2-2.29.52.jar:/opt/spark/extra-jars/iceberg-spark-runtime-4.1_2.13-1.11.0.jar:/opt/spark/extra-jars/postgresql-42.7.4.jar"

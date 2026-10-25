@@ -1,0 +1,43 @@
+slice_name: Pedidos en curso por nivel de riesgo
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  viz_type: echarts_timeseries_bar
+  datasource: 21__table
+  metrics:
+  - expressionType: SQL
+    sqlExpression: COUNT(*)
+    label: Pedidos
+  groupby:
+  - nivel_riesgo
+  adhoc_filters: []
+  x_axis: nivel_riesgo_dim
+  orientation: horizontal
+  row_limit: 100
+  orderby:
+  - - nivel_orden
+    - true
+  order_desc: false
+  sort_x_axis: null
+  show_value: true
+  show_legend: false
+  color_scheme: custom
+  label_colors:
+    Vencido: '#8A3A10'
+    Alto: '#B8571B'
+    Medio: '#E3A27A'
+    Bajo: '#C9CED6'
+  x_axis_title: ''
+  y_axis_title: ''
+  y_axis_showminmax: false
+  show_extra_controls: false
+  rich_tooltip: false
+  bar_width_ratio: 0.5
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 84637420-f9e8-4ec0-837c-37ada9418f1e
+version: 1.0.0
+dataset_uuid: 46c34554-d436-4f2c-bcc3-90335996c053

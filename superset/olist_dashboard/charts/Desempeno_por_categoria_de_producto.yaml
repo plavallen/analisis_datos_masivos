@@ -1,0 +1,53 @@
+slice_name: "Desempe\xF1o por categoria de producto"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  groupby:
+  - categoria_principal
+  metrics:
+  - label: Envios
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+  - label: OTD
+    expressionType: SQL
+    sqlExpression: AVG(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END)
+  - label: "Rese\xF1as negativas"
+    expressionType: SQL
+    sqlExpression: AVG(CASE WHEN review_negativa THEN 1.0 ELSE 0.0 END)
+  - label: Ratio flete
+    expressionType: SQL
+    sqlExpression: SUM(flete) / NULLIF(SUM(precio), 0)
+  order_desc: true
+  page_length: 20
+  include_search: true
+  table_filter: true
+  having: COUNT(*) >= 30
+  datasource: 3__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 3, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": ["categoria_principal"], "metrics": [{"expressionType": "SQL", "label":
+  "Envios", "sqlExpression": "COUNT(*)"}, {"expressionType": "SQL", "label": "OTD",
+  "sqlExpression": "AVG(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0 END)"}, {"expressionType":
+  "SQL", "label": "Rese\u00f1as negativas", "sqlExpression": "AVG(CASE WHEN review_negativa
+  THEN 1.0 ELSE 0.0 END)"}, {"expressionType": "SQL", "label": "Ratio flete", "sqlExpression":
+  "SUM(flete) / NULLIF(SUM(precio), 0)"}], "orderby": [[{"expressionType": "SQL",
+  "label": "Envios", "sqlExpression": "COUNT(*)"}, false]], "annotation_layers": [],
+  "series_limit": 0, "group_others_when_limit_reached": false, "order_desc": true,
+  "url_params": {}, "custom_params": {}, "custom_form_data": {}, "post_processing":
+  [], "time_offsets": []}], "form_data": {"datasource": "3__table", "groupby": ["categoria_principal"],
+  "having": "COUNT(*) >= 30", "include_search": true, "metrics": [{"expressionType":
+  "SQL", "label": "Envios", "sqlExpression": "COUNT(*)"}, {"expressionType": "SQL",
+  "label": "OTD", "sqlExpression": "AVG(CASE WHEN tarde = FALSE THEN 1.0 ELSE 0.0
+  END)"}, {"expressionType": "SQL", "label": "Rese\u00f1as negativas", "sqlExpression":
+  "AVG(CASE WHEN review_negativa THEN 1.0 ELSE 0.0 END)"}, {"expressionType": "SQL",
+  "label": "Ratio flete", "sqlExpression": "SUM(flete) / NULLIF(SUM(precio), 0)"}],
+  "order_desc": true, "page_length": 20, "slice_id": 15, "table_filter": true, "viz_type":
+  "table", "force": false, "result_format": "json", "result_type": "full"}, "result_format":
+  "json", "result_type": "full"}'
+cache_timeout: null
+uuid: 789920c9-ec8d-4fce-bbdb-a666f238e0c6
+version: 1.0.0
+dataset_uuid: b09af493-a91c-4800-b921-5b4d4c651a94

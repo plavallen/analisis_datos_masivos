@@ -1,0 +1,56 @@
+slice_name: "OTD y rese\xF1as negativas por mes"
+description: null
+certified_by: null
+certification_details: null
+viz_type: mixed_timeseries
+params:
+  x_axis: anio_mes
+  metrics:
+  - expressionType: SQL
+    sqlExpression: 1.0 - SUM(n_tardios)*1.0/NULLIF(SUM(n_entregados),0)
+    label: OTD
+  - expressionType: SQL
+    sqlExpression: SUM(n_resenas_negativas)*1.0/NULLIF(SUM(n_con_resena),0)
+    label: "Rese\xF1as negativas"
+  metrics_b:
+  - expressionType: SQL
+    sqlExpression: SUM(n_entregados)
+    label: Entregados
+  groupby: []
+  groupby_b: []
+  y_axis_format: .1%
+  y_axis_format_secondary: ',.0f'
+  y_axis_bounds:
+  - 0
+  - 1
+  color_scheme: olist
+  show_legend: false
+  legendOrientation: Top
+  legendType: plain
+  viz_type_b: Bar
+  time_range: No filter
+  datasource: 7__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 7, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "anio_mes", "label": "anio_mes",
+  "expressionType": "SQL", "isColumnReference": true}], "metrics": [{"expressionType":
+  "SQL", "label": "Tard\u00edos", "sqlExpression": "SUM(n_tardios)"}, {"expressionType":
+  "SQL", "label": "Con rese\u00f1a", "sqlExpression": "SUM(n_con_resena)"}], "orderby":
+  [[{"expressionType": "SQL", "label": "Tard\u00edos", "sqlExpression": "SUM(n_tardios)"},
+  false]], "annotation_layers": [], "series_columns": [], "series_limit": 0, "group_others_when_limit_reached":
+  false, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data":
+  {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index":
+  ["anio_mes"], "columns": [], "aggregates": {"Tard\u00edos": {"operator": "mean"},
+  "Con rese\u00f1a": {"operator": "mean"}}, "drop_missing_columns": true}}, {"operation":
+  "flatten"}]}], "form_data": {"color_scheme": "supersetColors", "datasource": "7__table",
+  "groupby": [], "metrics": [{"expressionType": "SQL", "label": "Tard\u00edos", "sqlExpression":
+  "SUM(n_tardios)"}, {"expressionType": "SQL", "label": "Con rese\u00f1a", "sqlExpression":
+  "SUM(n_con_resena)"}], "rich_tooltip": true, "show_legend": true, "slice_id": 7,
+  "viz_type": "echarts_timeseries_bar", "x_axis": "anio_mes", "y_axis_format": ",.0f",
+  "force": false, "result_format": "json", "result_type": "full"}, "result_format":
+  "json", "result_type": "full"}'
+cache_timeout: null
+uuid: 43773fc6-2ef8-4b60-a046-7ca5f3e54d06
+version: 1.0.0
+dataset_uuid: 210acfd6-7844-42d4-a4e7-6a6fa41a864b

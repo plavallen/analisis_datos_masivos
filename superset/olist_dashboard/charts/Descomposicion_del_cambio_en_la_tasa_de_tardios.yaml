@@ -1,0 +1,83 @@
+slice_name: "Descomposici\xF3n del cambio en la tasa de tard\xEDos"
+description: "Cada barra muestra el cambio en la tasa de tard\xEDos respecto al mes\
+  \ anterior (referencia: SUM(w0\xB7p0) sobre grupos con datos en ambos meses). La\
+  \ suma de los efectos es algebraicamente igual al delta exacto."
+certified_by: null
+certification_details: null
+viz_type: mixed_timeseries
+params:
+  datasource: 9__table
+  x_axis: mes
+  metrics:
+  - label: "Efecto composici\xF3n (pp)"
+    expressionType: SQL
+    sqlExpression: SUM(efecto_composicion) * 100
+  - label: Efecto tasa (pp)
+    expressionType: SQL
+    sqlExpression: SUM(efecto_tasa) * 100
+  groupby: []
+  metrics_b:
+  - label: "Tasa tard\xEDos"
+    expressionType: SQL
+    sqlExpression: MAX(tasa_tardios)
+  groupby_b: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: dimension
+    operator: ==
+    comparator: customer_state
+  adhoc_filters_b:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: dimension
+    operator: ==
+    comparator: customer_state
+  yAxisIndex: 0
+  yAxisIndexB: 1
+  y_axis_format: .2f
+  y_axis_format_secondary: .1%
+  y_axis_title: Cambio (pp)
+  y_axis_title_secondary: "Tasa tard\xEDos"
+  show_legend: false
+  color_scheme: olist
+  time_range: No filter
+  annotation_layers: []
+  barStacked: true
+  seriesType: bar
+  seriesTypeB: line
+  stack: true
+  stackB: false
+  opacity: 0.8
+  markerEnabled: false
+  markerEnabledB: true
+  markerSize: 6
+query_context: "{\"datasource\":{\"id\":9,\"type\":\"table\"},\"force\":false,\"queries\"\
+  :[{\"time_range\":\"No filter\",\"filters\":[],\"extras\":{\"having\":\"\",\"where\"\
+  :\"\"},\"applied_time_extras\":{},\"columns\":[{\"columnType\":\"BASE_AXIS\",\"\
+  sqlExpression\":\"mes\",\"label\":\"mes\",\"expressionType\":\"SQL\",\"isColumnReference\"\
+  :true}],\"metrics\":[{\"expressionType\":\"SQL\",\"label\":\"Efecto composici\xF3\
+  n\",\"optionName\":\"_c_Efecto_compo\",\"sqlExpression\":\"SUM(efecto_composicion)\"\
+  },{\"expressionType\":\"SQL\",\"label\":\"Efecto tasa\",\"optionName\":\"_c_Efecto_tasa\"\
+  ,\"sqlExpression\":\"SUM(efecto_tasa)\"}],\"orderby\":[[{\"expressionType\":\"SQL\"\
+  ,\"label\":\"Efecto composici\xF3n\",\"optionName\":\"_c_Efecto_compo\",\"sqlExpression\"\
+  :\"SUM(efecto_composicion)\"},false]],\"annotation_layers\":[],\"series_columns\"\
+  :[],\"series_limit\":0,\"group_others_when_limit_reached\":false,\"order_desc\"\
+  :true,\"url_params\":{},\"custom_params\":{},\"custom_form_data\":{},\"time_offsets\"\
+  :[],\"post_processing\":[{\"operation\":\"pivot\",\"options\":{\"index\":[\"mes\"\
+  ],\"columns\":[],\"aggregates\":{\"Efecto composici\xF3n\":{\"operator\":\"mean\"\
+  },\"Efecto tasa\":{\"operator\":\"mean\"}},\"drop_missing_columns\":true}},{\"operation\"\
+  :\"flatten\"}]}],\"form_data\":{\"annotation_layers\":[],\"color_scheme\":\"olist\"\
+  ,\"datasource\":\"9__table\",\"groupby\":[],\"legendOrientation\":\"Top\",\"metrics\"\
+  :[{\"expressionType\":\"SQL\",\"label\":\"Efecto composici\xF3n\",\"optionName\"\
+  :\"_c_Efecto_compo\",\"sqlExpression\":\"SUM(efecto_composicion)\"},{\"expressionType\"\
+  :\"SQL\",\"label\":\"Efecto tasa\",\"optionName\":\"_c_Efecto_tasa\",\"sqlExpression\"\
+  :\"SUM(efecto_tasa)\"}],\"show_legend\":true,\"slice_id\":22,\"time_range\":\"No\
+  \ filter\",\"viz_type\":\"echarts_timeseries_bar\",\"x_axis\":\"mes\",\"y_axis_format\"\
+  :\".1%\",\"y_axis_title\":\"Cambio en tasa\",\"force\":false,\"result_format\":\"\
+  json\",\"result_type\":\"full\"},\"result_format\":\"json\",\"result_type\":\"full\"\
+  }"
+cache_timeout: null
+uuid: 782e0256-9dcf-4559-8f54-6a78d14e3722
+version: 1.0.0
+dataset_uuid: c1fa0d72-e97b-4ea0-9d7a-b1f03748daf6

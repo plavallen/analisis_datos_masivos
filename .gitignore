@@ -1,0 +1,40 @@
+# Datos originales (CSV de Kaggle) — cada integrante los tiene localmente
+data/
+
+# JARs de Spark (binarios grandes, se descargan con scripts/download_jars.sh)
+jars/
+*.jar
+
+# Credenciales (sí se versiona .env.example)
+.env
+!.env.example
+
+# Imágenes y capturas (no son código)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Datos / archivos de resultados (no son código)
+*.csv
+*.geojson
+*.parquet
+*.db
+
+# Notebooks ejecutados (tienen outputs embedidos)
+*_ejecutado*.ipynb
+
+# Superset: solo el ZIP binario
+superset/*.zip
+superset/.olist_dashboard_export.zip
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Sistema operativo / editores
+.DS_Store
+.vscode/
+.idea/

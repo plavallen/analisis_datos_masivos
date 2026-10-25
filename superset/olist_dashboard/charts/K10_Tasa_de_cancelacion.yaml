@@ -1,0 +1,33 @@
+slice_name: "K10 Tasa de cancelaci\xF3n"
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    expressionType: SQL
+    sqlExpression: SUM(CASE WHEN en_periodo_util = TRUE AND order_status IN ('canceled','unavailable')     THEN
+      1.0 ELSE 0.0 END) / NULLIF(SUM(CASE WHEN en_periodo_util = TRUE THEN 1.0 ELSE
+      0.0 END), 0)
+    label: "K10 Cancelaci\xF3n"
+    hasCustomLabel: true
+  subheader: "Cancelados y no disponibles en el per\xEDodo seleccionado"
+  y_axis_format: .1%
+  force_timestamp_formatting: false
+  time_range: No filter
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  header_font_size: 0.4
+  subheader_font_size: 0.15
+  time_grain_sqla: null
+  datasource: 2__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 314e08fb-3658-4a7d-a5d7-3dc8337fcf06
+version: 1.0.0
+dataset_uuid: c7711f54-1cc4-4b46-9339-0e09e231b3cb

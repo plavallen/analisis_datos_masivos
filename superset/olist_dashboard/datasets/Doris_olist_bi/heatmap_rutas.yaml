@@ -1,0 +1,86 @@
+table_name: heatmap_rutas
+main_dttm_col: null
+currency_code_column: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: null
+schema: olist_bi
+sql: "SELECT\n  seller_state,\n  customer_state,\n  AVG(CASE WHEN tarde = FALSE THEN\
+  \ 1.0 ELSE 0.0 END) AS otd_rate,\n  COUNT(*) AS n_envios\nFROM olist_bi.envios\n\
+  GROUP BY seller_state, customer_state\nHAVING COUNT(*) >= 30"
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+folders: null
+uuid: 9f7494e2-1838-4a7a-b352-031d4b803a4a
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra: null
+  warning_text: null
+columns:
+- column_name: otd_rate
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: NEWDECIMAL
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: customer_state
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: BLOB
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: seller_state
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: BLOB
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+- column_name: n_envios
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: LONGLONG
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  datetime_format: null
+  extra: null
+version: 1.0.0
+database_uuid: 1b7d496e-5a28-452d-8727-71c903ac150c

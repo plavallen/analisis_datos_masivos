@@ -1,0 +1,28 @@
+slice_name: "Eventos externos del per\xEDodo"
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  groupby:
+  - fecha_fmt
+  - nombre
+  - descripcion
+  - fuente
+  metrics: []
+  time_range: No filter
+  order_desc: false
+  row_limit: 20
+  datasource: 12__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: a7f7129e-1f75-4bec-8367-012f7a7e6a2f
+version: 1.0.0
+dataset_uuid: ecae28b2-f326-438c-b53a-0c78118c0a0e

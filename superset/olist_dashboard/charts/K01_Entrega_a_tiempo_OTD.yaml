@@ -1,0 +1,31 @@
+slice_name: K01 Entrega a tiempo (OTD)
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    expressionType: SQL
+    sqlExpression: SUM(CASE WHEN dias_atraso <= 0 THEN 1.0 ELSE 0.0 END) / COUNT(*)
+    label: K01 OTD
+    hasCustomLabel: true
+  subheader: "Entregados a tiempo en el per\xEDodo seleccionado"
+  y_axis_format: .1%
+  force_timestamp_formatting: false
+  time_range: No filter
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  header_font_size: 0.4
+  subheader_font_size: 0.15
+  time_grain_sqla: null
+  datasource: 1__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: f5298472-be0b-4555-ad0e-94cd4fff2f89
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

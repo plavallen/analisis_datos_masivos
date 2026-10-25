@@ -1,0 +1,25 @@
+slice_name: GMV mensual
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  x_axis: anio_mes
+  metrics:
+  - label: GMV M R$
+    expressionType: SQL
+    sqlExpression: SUM(gmv_total) / 1000000.0
+  groupby: []
+  y_axis_format: ',.1f'
+  color_scheme: olist
+  show_legend: false
+  time_range: No filter
+  y_axis_title: R$ M
+  y_axis_title_margin: 20
+  datasource: 7__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 39825a69-2064-4758-aec4-87de791aa6fa
+version: 1.0.0
+dataset_uuid: 210acfd6-7844-42d4-a4e7-6a6fa41a864b

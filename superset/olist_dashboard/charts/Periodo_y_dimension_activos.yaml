@@ -1,0 +1,41 @@
+slice_name: "Per\xEDodo y dimensi\xF3n activos"
+description: "Mes y dimensi\xF3n seleccionados actualmente en los filtros del dashboard."
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  datasource: 22__table
+  groupby:
+  - Mes a analizar
+  - "Dimensi\xF3n de an\xE1lisis"
+  metrics: []
+  time_range: No filter
+  row_limit: 1
+  page_length: 0
+  show_cell_bars: false
+  table_timestamp_format: smart_date
+  adhoc_filters: []
+  include_search: false
+  query_mode: aggregate
+  align_pn: false
+  color_pn: false
+  column_config: {}
+query_context: "{\"datasource\":{\"id\":22,\"type\":\"table\"},\"force\":false,\"\
+  queries\":[{\"time_range\":\"No filter\",\"filters\":[],\"extras\":{\"having\":\"\
+  \",\"where\":\"\"},\"applied_time_extras\":{},\"columns\":[\"Mes a analizar\",\"\
+  Dimensi\xF3n de an\xE1lisis\"],\"metrics\":[],\"orderby\":[],\"annotation_layers\"\
+  :[],\"row_limit\":1,\"series_limit\":0,\"group_others_when_limit_reached\":false,\"\
+  order_desc\":true,\"url_params\":{},\"custom_params\":{},\"custom_form_data\":{},\"\
+  post_processing\":[],\"time_offsets\":[]}],\"form_data\":{\"adhoc_filters\":[],\"\
+  align_pn\":false,\"color_pn\":false,\"column_config\":{},\"datasource\":\"22__table\"\
+  ,\"groupby\":[\"Mes a analizar\",\"Dimensi\xF3n de an\xE1lisis\"],\"include_search\"\
+  :false,\"metrics\":[],\"page_length\":0,\"query_mode\":\"aggregate\",\"row_limit\"\
+  :1,\"show_cell_bars\":false,\"slice_id\":36,\"table_timestamp_format\":\"smart_date\"\
+  ,\"time_range\":\"No filter\",\"viz_type\":\"table\",\"force\":false,\"result_format\"\
+  :\"json\",\"result_type\":\"full\"},\"result_format\":\"json\",\"result_type\":\"\
+  full\"}"
+cache_timeout: null
+uuid: 52e3fc79-933e-4dae-8c21-2a4a366ba4b4
+version: 1.0.0
+dataset_uuid: 0b238bc7-65f0-4828-989e-a78ae00efeb2

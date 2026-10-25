@@ -1,0 +1,143 @@
+/* OLIST Logística — Dashboard CSS
+   Tipografía IBM Plex Sans/Mono, paleta #1F5FC4/#B8571B/#5A6270 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap');
+
+/* ── Tipografía base ─────────────────────────────────────────────────── */
+body,
+.dashboard,
+.ant-typography,
+.ant-tabs {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+/* ── Fondo del dashboard ─────────────────────────────────────────────── */
+.dragdroppable-content {
+  background: #F4F5F7 !important;
+}
+
+/* ── Tarjeta de gráfico ──────────────────────────────────────────────── */
+.chart-slice .chart-container,
+.slice_container {
+  background: #FFFFFF !important;
+  border: 1px solid #E1E4EA !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* ── Título del gráfico ──────────────────────────────────────────────── */
+.chart-slice .chart-header .header-title,
+.slice_header .header-title,
+.slice-header .header-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #1B1F24 !important;
+  font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+/* ── Textos secundarios ──────────────────────────────────────────────── */
+.chart-slice .chart-header,
+.slice_header,
+.chart-slice .metadata {
+  color: #5A6270 !important;
+}
+
+/* ── Pestañas activas ────────────────────────────────────────────────── */
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1F5FC4 !important;
+  font-weight: 600 !important;
+}
+.ant-tabs-ink-bar {
+  background: #1F5FC4 !important;
+}
+.ant-tabs-tab .ant-tabs-tab-btn {
+  color: #5A6270 !important;
+}
+
+/* ── Big Number ──────────────────────────────────────────────────────── */
+.chart-slice .chart-container .big-number-container {
+  padding: 12px 16px !important;
+}
+.chart-slice .chart-container .big-number {
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+  color: #1B1F24 !important;
+  font-family: 'IBM Plex Mono', monospace !important;
+}
+.chart-slice .chart-container .subheader {
+  font-size: 12px !important;
+  color: #5A6270 !important;
+}
+
+/* ── Tablas ──────────────────────────────────────────────────────────── */
+.dt-cell-value,
+.dt-cell-value--numeric {
+  font-family: 'IBM Plex Mono', monospace !important;
+  font-size: 13px !important;
+}
+.dt-cell-value--numeric {
+  text-align: right !important;
+}
+
+/* ── Componentes Markdown (subtítulos de pestaña) ────────────────────── */
+.dragdroppable--markdown p {
+  color: #5A6270 !important;
+  font-size: 13px !important;
+  margin: 0 !important;
+  padding: 4px 0 !important;
+}
+
+
+/* KPI sparkline: sin barra de desplazamiento interna */
+.chart-slice .chart-container { overflow: hidden !important; }
+
+/* ── KPI Handlebars cards ────────────────────────────────────────────── */
+.kpi-card {
+  padding: 10px 14px;
+  height: calc(100% - 2px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5A6270;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #1B1F24;
+  line-height: 1.2;
+  margin: 4px 0 2px;
+}
+.kpi-value--primary { color: #1F5FC4; }
+.kpi-value--alert   { color: #B8571B; }
+.kpi-note {
+  font-size: 11px;
+  color: #5A6270;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-spark {
+  width: 100%;
+  height: 36px;
+  flex-shrink: 0;
+}
+.kpi-spark-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.kpi-spark-line--primary { stroke: #1F5FC4; }
+.kpi-spark-line--alert   { stroke: #B8571B; }

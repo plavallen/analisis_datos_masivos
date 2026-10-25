@@ -1,0 +1,67 @@
+slice_name: Pedidos y tardios por dia de compra
+description: null
+certified_by: null
+certification_details: null
+viz_type: mixed_timeseries
+params:
+  x_axis: fecha_compra
+  metrics:
+  - label: "Pedidos del d\xEDa"
+    expressionType: SQL
+    sqlExpression: SUM(n_pedidos)
+  metrics_b:
+  - label: "% tard\xEDos"
+    expressionType: SQL
+    sqlExpression: SUM(n_tardios) * 1.0 / NULLIF(SUM(n_entregados), 0)
+  groupby: []
+  groupby_b: []
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  adhoc_filters_b:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  y_axis_format: ',d'
+  y_axis_format_secondary: .1%
+  yAxisIndex: 0
+  yAxisIndexB: 1
+  color_scheme: supersetColors
+  show_legend: false
+  datasource: 8__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 8, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "fecha_compra", "label":
+  "fecha_compra", "expressionType": "SQL", "isColumnReference": true}], "metrics":
+  [{"expressionType": "SQL", "label": "Pedidos", "sqlExpression": "SUM(n_pedidos)"}],
+  "annotation_layers": [], "series_limit": 0, "group_others_when_limit_reached": false,
+  "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [],
+  "post_processing": [{"operation": "pivot", "options": {"index": ["fecha_compra"],
+  "columns": ["fecha_compra"], "aggregates": {"Pedidos": {"operator": "mean"}}, "drop_missing_columns":
+  true}}, {"operation": "flatten"}], "orderby": [[{"expressionType": "SQL", "label":
+  "Pedidos", "sqlExpression": "SUM(n_pedidos)"}, false]]}, {"filters": [], "extras":
+  {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [{"columnType":
+  "BASE_AXIS", "sqlExpression": "fecha_compra", "label": "fecha_compra", "expressionType":
+  "SQL", "isColumnReference": true}], "metrics": [{"expressionType": "SQL", "label":
+  "Tardios pct", "sqlExpression": "SUM(n_tardios) / NULLIF(SUM(n_entregados), 0)"}],
+  "annotation_layers": [], "series_limit": 0, "group_others_when_limit_reached": false,
+  "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [],
+  "post_processing": [{"operation": "pivot", "options": {"index": ["fecha_compra"],
+  "columns": ["fecha_compra"], "aggregates": {"Tardios pct": {"operator": "mean"}},
+  "drop_missing_columns": true}}, {"operation": "flatten"}], "orderby": [[{"expressionType":
+  "SQL", "label": "Tardios pct", "sqlExpression": "SUM(n_tardios) / NULLIF(SUM(n_entregados),
+  0)"}, false]]}], "form_data": {"color_scheme": "supersetColors", "datasource": "8__table",
+  "metrics": [{"expressionType": "SQL", "label": "Pedidos", "sqlExpression": "SUM(n_pedidos)"}],
+  "slice_id": 21, "viz_type": "mixed_timeseries", "x_axis": "fecha_compra", "y_axis_format":
+  ",d", "y_axis_format_secondary": ".1%", "force": false, "result_format": "json",
+  "result_type": "full"}, "result_format": "json", "result_type": "full"}'
+cache_timeout: null
+uuid: e71f7bb3-4f64-4612-82a4-bbdfa1f97f86
+version: 1.0.0
+dataset_uuid: 54abad0f-7395-4526-b5af-1058b47becda

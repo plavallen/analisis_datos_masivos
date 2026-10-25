@@ -1,0 +1,43 @@
+slice_name: "Tasa de tard\xEDos por estado de destino"
+description: null
+certified_by: null
+certification_details: null
+viz_type: country_map
+params:
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  select_country: brazil
+  entity: uf_iso
+  metric:
+    label: "Tasa tard\xEDos"
+    expressionType: SQL
+    sqlExpression: AVG(CASE WHEN tarde = 1 THEN 1.0 ELSE 0.0 END)
+  country_fieldtype: cca2
+  linear_color_scheme: olist_tardios
+  number_format: .1%
+  show_bubbles: false
+  datasource: 1__table
+  annotation_layers: []
+  secondary_metric:
+    label: N pedidos
+    expressionType: SIMPLE
+    column:
+      column_name: order_id
+    aggregate: COUNT
+query_context: '{"datasource": {"id": 1, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": [], "metrics": ["K01_OTD"], "annotation_layers": [], "series_limit":
+  0, "group_others_when_limit_reached": false, "order_desc": true, "url_params": {},
+  "custom_params": {}, "custom_form_data": {}}], "form_data": {"country_fieldtype":
+  "cca2", "datasource": "1__table", "entity": "uf_iso", "linear_color_scheme": "blue_white_yellow",
+  "metric": "K01_OTD", "number_format": ".1%", "select_country": "BR", "slice_id":
+  9, "viz_type": "country_map", "force": false, "result_format": "json", "result_type":
+  "full"}, "result_format": "json", "result_type": "full"}'
+cache_timeout: null
+uuid: 21ff44ab-4552-469c-bdcf-7b707202b0e3
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

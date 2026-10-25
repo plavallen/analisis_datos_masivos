@@ -1,0 +1,90 @@
+slice_name: Pedidos en curso con mayor riesgo de atraso
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  viz_type: table
+  all_columns:
+  - riesgo_num
+  - nivel_riesgo
+  - riesgo_relativo
+  - dias_hasta_promesa
+  - ruta
+  - categoria
+  - vendedor
+  - pedido
+  - fecha_prometida
+  order_desc: true
+  order_by_cols:
+  - '["riesgo_num", false]'
+  - '["riesgo_relativo", false]'
+  page_length: 15
+  include_search: true
+  show_cell_bars: false
+  table_timestamp_format: '%Y-%m-%d'
+  conditional_formatting:
+  - column: nivel_riesgo
+    operator: '='
+    targetValue: Vencido
+    colorScheme: '#F5CBAA'
+  - column: nivel_riesgo
+    operator: '='
+    targetValue: Alto
+    colorScheme: '#FAE0CC'
+  - column: nivel_riesgo
+    operator: '='
+    targetValue: Medio
+    colorScheme: '#FDEBD9'
+  - column: nivel_riesgo
+    operator: '='
+    targetValue: Bajo
+    colorScheme: '#EDEEF0'
+  - column: dias_hasta_promesa
+    operator: <=
+    targetValue: 3
+    colorScheme: '#FFB347'
+  column_config:
+    riesgo_num:
+      label: ''
+      columnWidth: 1
+    nivel_riesgo:
+      label: Nivel
+      columnWidth: 70
+    riesgo_relativo:
+      label: Riesgo relativo
+      columnWidth: 95
+      d3NumberFormat: .1f
+      showCellBars: true
+    dias_hasta_promesa:
+      label: "D\xEDas"
+      columnWidth: 48
+    ruta:
+      label: Ruta
+      columnWidth: 80
+    categoria:
+      label: "Categor\xEDa"
+      columnWidth: 110
+    vendedor:
+      label: Vendedor
+      columnWidth: 62
+    pedido:
+      label: Pedido
+      columnWidth: 62
+    fecha_prometida:
+      label: Fecha prometida
+      columnWidth: 100
+  metrics: []
+  groupby: []
+  row_limit: 1826
+  datasource: 21__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 21, "type": "table"}, "queries": [{"columns":
+  ["riesgo_num", "nivel_riesgo", "riesgo_relativo", "dias_hasta_promesa", "ruta",
+  "categoria", "vendedor", "pedido", "fecha_prometida"], "orderby": [["riesgo_num",
+  false], ["riesgo_relativo", false]], "row_limit": 1826}], "result_format": "json",
+  "result_type": "full"}'
+cache_timeout: null
+uuid: cff10847-6d77-4768-bf43-2e745bb1a94a
+version: 1.0.0
+dataset_uuid: 46c34554-d436-4f2c-bcc3-90335996c053

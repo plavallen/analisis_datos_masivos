@@ -1,0 +1,40 @@
+slice_name: "K08 Rese\xF1as negativas"
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    expressionType: SQL
+    sqlExpression: SUM(CASE WHEN review_negativa = TRUE THEN 1.0 ELSE 0.0 END) / COUNT(*)
+    label: "K08 Rese\xF1as negativas"
+    hasCustomLabel: true
+  subheader: "Solo entregados del per\xEDodo seleccionado"
+  y_axis_format: .1%
+  force_timestamp_formatting: false
+  time_range: No filter
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: fecha_compra
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+  header_font_size: 0.4
+  subheader_font_size: 0.15
+  time_grain_sqla: null
+  datasource: 1__table
+  annotation_layers: []
+query_context: '{"datasource": {"id": 1, "type": "table"}, "force": false, "queries":
+  [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {},
+  "columns": [], "metrics": ["K08_neg"], "annotation_layers": [], "series_limit":
+  0, "group_others_when_limit_reached": false, "order_desc": true, "url_params": {},
+  "custom_params": {}, "custom_form_data": {}, "is_timeseries": true, "post_processing":
+  [{"operation": "flatten"}]}], "form_data": {"color_picker": {"a": 1, "b": 255, "g":
+  122, "r": 0}, "datasource": "1__table", "metric": "K08_neg", "show_trend_line":
+  true, "slice_id": 2, "subheader": "", "viz_type": "big_number", "y_axis_format":
+  ".1%", "force": false, "result_format": "json", "result_type": "full"}, "result_format":
+  "json", "result_type": "full"}'
+cache_timeout: null
+uuid: f99f5bd0-a26f-43e2-9160-ccd1d78092fd
+version: 1.0.0
+dataset_uuid: ece3cda7-a8d3-4ee8-a6b6-0a24a97f31b9

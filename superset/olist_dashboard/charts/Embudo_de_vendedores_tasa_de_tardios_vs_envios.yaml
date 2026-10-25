@@ -1,0 +1,35 @@
+slice_name: 'Embudo de vendedores: tasa de tardios vs envios'
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  groupby:
+  - seller_id
+  - clasificacion_embudo
+  - seller_region
+  time_range: No filter
+  metrics:
+  - expressionType: SQL
+    sqlExpression: MAX(n_envios)
+    label: "Env\xEDos"
+    optionName: "_c_Env\xEDos"
+  - expressionType: SQL
+    sqlExpression: MAX(n_tardios)
+    label: "Tard\xEDos"
+    optionName: "_c_Tard\xEDos"
+  - expressionType: SQL
+    sqlExpression: MAX(tasa_tardios)
+    label: "Tasa tard\xEDos"
+    optionName: "_c_Tasa_tard\xEDos"
+  order_desc: true
+  row_limit: 50
+  page_length: 25
+  include_search: true
+  datasource: 4__table
+  annotation_layers: []
+query_context: null
+cache_timeout: null
+uuid: 5cde6c2a-73ce-4739-94f0-3cf08c992675
+version: 1.0.0
+dataset_uuid: 232ea2bd-d763-4684-b14e-69f563040ef4
