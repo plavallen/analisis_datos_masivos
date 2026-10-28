@@ -1,19 +1,56 @@
 name: olist
 
+# Stack completo del TP: PostgreSQL (Etapa 1) → RustFS + Spark (lake bronze/silver/gold)
+# → Doris (capa analítica) → Superset (dashboard). MLflow registra los experimentos del modelo.
+# El orden de ejecución está en el README y en el Makefile (make todo).
+
 # ── Redes ──────────────────────────────────────────────────────────────────────
+# Subred fija para que Doris conserve su IP entre reinicios: el FE guarda su propia IP
+# en la metadata y, si cambia, se queda en "wait catalog to be ready".
 networks:
   olist_net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.89.40.0/24
 
 # ── Volúmenes ──────────────────────────────────────────────────────────────────
 volumes:
+  pgdata:
   rustfs_data:
   doris_fe_meta:
   doris_be_data:
   superset_home:
-  mlflow_artifacts:
 
 services:
+
+  # ── PostgreSQL (Etapa 1: sistema transaccional) ────────────────────────────
+  postgres:
+    image: postgres:16
+    container_name: olist-postgres
+    networks: [olist_net]
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c shared_buffers=1GB
+      -c work_mem=4MB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./data/raw:/data/raw:ro   # los 9 CSV de Olist (solo lectura)
+      - ./sql:/sql:ro             # scripts DDL y de carga (solo lectura)
+    ports:
+      - "5432:5432"
+    shm_size: 1g
+    mem_limit: ${PG_MEM_LIMIT:-4g}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   # ── RustFS (S3-compatible) ─────────────────────────────────────────────────
   rustfs:
@@ -82,7 +119,9 @@ services:
   doris:
     image: apache/doris:doris-all-in-one-2.1.0
     container_name: olist-doris
-    networks: [olist_net]
+    networks:
+      olist_net:
+        ipv4_address: 10.89.40.10   # IP fija (ver comentario de la red)
     ports:
       - "9030:9030"   # FE MySQL
       - "8030:8030"   # FE HTTP
@@ -101,8 +140,11 @@ services:
       start_period: 180s
 
   # ── Apache Superset ───────────────────────────────────────────────────────
+  # Imagen oficial + pymysql en el venv (docker/superset/Dockerfile). Se construye con make build.
   superset:
-    image: apache/superset:latest
+    build:
+      context: docker/superset
+    image: olist-superset:local
     container_name: olist-superset
     networks: [olist_net]
     depends_on:
@@ -120,25 +162,24 @@ services:
       SUPERSET_ADMIN_PASS:  ${SUPERSET_ADMIN_PASS:-admin}
       SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@olist.local}
       MAPBOX_API_KEY:       ${MAPBOX_API_KEY:-}
-      DORIS_HOST:           doris
-      DORIS_PORT:           9030
-      DORIS_DB:             olist_bi
-      DORIS_USER:           ${DORIS_SUPERSET_USER:-superset_ro}
-      DORIS_PASS:           ${DORIS_SUPERSET_PASS:-}
+    # Todas las líneas con la misma sangría: en un bloque >- las líneas más indentadas
+    # conservan el salto de línea y el shell las ejecutaría como comandos sueltos
+    # (create-admin corría sin argumentos y el usuario admin nunca se creaba).
     command: >-
-      /bin/sh -c "pip3 install --quiet pymysql 2>/dev/null || true &&
-      superset db upgrade &&
-      superset fab create-admin
-        --username $${SUPERSET_ADMIN_USER:-admin}
-        --firstname Admin --lastname Admin
-        --email $${SUPERSET_ADMIN_EMAIL:-admin@olist.local}
-        --password $${SUPERSET_ADMIN_PASS:-admin} 2>/dev/null || true &&
+      /bin/sh -c "superset db upgrade &&
+      (superset fab create-admin
+      --username $${SUPERSET_ADMIN_USER:-admin}
+      --firstname Admin --lastname Admin
+      --email $${SUPERSET_ADMIN_EMAIL:-admin@olist.local}
+      --password $${SUPERSET_ADMIN_PASS:-admin} || true) &&
       superset init &&
       superset run -h 0.0.0.0 -p 8088"
 
   # ── MLflow Tracking Server ────────────────────────────────────────────────
+  # Backend en PostgreSQL (base mlflow_db, la crea make init); artefactos en RustFS.
+  # Solo lo usa la notebook de entrenamiento (notebooks/etapa3/01_regresion_logistica.ipynb).
   mlflow:
-    image: jupyter/pyspark-notebook:latest
+    image: olist-jupyter:local
     container_name: olist-mlflow
     networks: [olist_net]
     ports:
@@ -151,32 +192,48 @@ services:
       AWS_DEFAULT_REGION:      us-east-1
       POSTGRES_USER:           ${POSTGRES_USER}
       POSTGRES_PASSWORD:       ${POSTGRES_PASSWORD}
-    depends_on: [rustfs]
+    depends_on:
+      rustfs:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     volumes:
       - ./docker/mlflow/proxy.py:/opt/mlflow_proxy.py:ro
       - ./docker/mlflow/start.sh:/opt/mlflow_start.sh:ro
     command: bash /opt/mlflow_start.sh
     restart: on-failure:3
 
-  # ── JupyterLab ────────────────────────────────────────────────────────────
+  # ── JupyterLab (driver de PySpark para el pipeline y el modelo) ───────────
   jupyter:
-    image: jupyter/pyspark-notebook:latest
+    build:
+      context: .
+      dockerfile: docker/jupyter/Dockerfile
+    image: olist-jupyter:local
     container_name: olist-jupyter
     networks: [olist_net]
-    depends_on: [spark-master, rustfs]
+    depends_on: [spark-master, rustfs, postgres]
     ports:
       - "8889:8888"   # JupyterLab
       - "4042:4040"   # Spark UI del driver
     volumes:
-      - ./notebooks:/home/jovyan/work
+      - ./notebooks:/home/notebooks
       - ./jars:/opt/spark/extra-jars:ro
       - ./data/raw:/data/raw:ro
-      - ./:/repo:ro
+      - ./:/repo:ro   # src/, scripts/, docs/, sql/ accesibles como /repo
     environment:
+      # S3 / RustFS
       AWS_ACCESS_KEY_ID:      ${RUSTFS_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY:  ${RUSTFS_SECRET_KEY}
       RUSTFS_ENDPOINT:        http://rustfs:9000
+      # PostgreSQL (fuente de la capa bronze)
+      POSTGRES_HOST:          postgres
+      POSTGRES_PORT:          5432
+      POSTGRES_DB:            ${POSTGRES_DB}
+      POSTGRES_USER:          ${POSTGRES_USER}
+      POSTGRES_PASSWORD:      ${POSTGRES_PASSWORD}
+      # MLflow
       MLFLOW_TRACKING_URI:    http://mlflow:5001
       MLFLOW_S3_ENDPOINT_URL: http://rustfs:9000
       MLFLOW_S3_IGNORE_TLS:   "true"
+      # Jars en el classpath del driver desde el arranque del JVM de PySpark.
       SPARK_CLASSPATH: "/opt/spark/extra-jars/hadoop-aws-3.4.2.jar:/opt/spark/extra-jars/aws-sdk-bundle-v2-2.29.52.jar:/opt/spark/extra-jars/iceberg-spark-runtime-4.1_2.13-1.11.0.jar:/opt/spark/extra-jars/postgresql-42.7.4.jar"

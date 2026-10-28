@@ -49,9 +49,9 @@ SOLUCIÓN DEFINITIVA (para que el import sea limpio de raíz)
 -----------------------------------------------------------
 Después de correr este script, re-exportar el dashboard limpio y guardar el ZIP:
 
-    docker compose -f etapa2/docker-compose.yml exec superset \
+    docker compose exec superset \
       superset export-dashboards -f /tmp/olist_dashboard_clean.zip
-    docker compose -f etapa2/docker-compose.yml cp \
+    docker compose cp \
       superset:/tmp/olist_dashboard_clean.zip superset/olist_dashboard.zip
 
 Luego re-extraer el YAML y commitear, para que el próximo import sea limpio.
