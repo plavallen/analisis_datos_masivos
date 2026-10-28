@@ -1,5 +1,12 @@
-# Datos originales (CSV de Kaggle) — cada integrante los tiene localmente
-data/
+# Datos originales (CSV de Kaggle): se copian a data/raw/ (la carpeta se versiona vacía)
+data/*
+!data/raw/
+data/raw/*
+!data/raw/.gitkeep
+
+# Export del modelo entrenado (make modelo-importar) y su carpeta temporal
+prediccion_export*.tar.gz
+.prediccion_tmp/
 
 # JARs de Spark (binarios grandes, se descargan con scripts/download_jars.sh)
 jars/

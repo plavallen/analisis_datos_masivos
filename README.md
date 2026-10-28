@@ -1,191 +1,280 @@
-# Etapa 2 — Infraestructura y exploración de datos
+# TP Integrador Olist — Logística de entregas
+
+Pipeline completo sobre el dataset público de Olist: carga en PostgreSQL, lake con patrón
+Medallion (bronze, silver, gold) en RustFS con Spark e Iceberg, capa analítica en Apache Doris,
+modelo de riesgo de atraso y dashboard en Apache Superset.
+
+Todo corre en contenedores Docker y se ejecuta desde la raíz del repositorio con `make`.
 
 ## Arquitectura
 
-Se implementa un **Data Lakehouse** con patrón **Medallion** sobre herramientas de procesamiento de datos masivos:
-
 ```
-PostgreSQL (Etapa 1)
-       │
+CSV de Olist (data/raw/)
+       │  COPY
+       ▼
+PostgreSQL           ← Etapa 1: esquemas raw y olist (tipado, PK/FK)
        │  JDBC (PySpark)
        ▼
-  RustFS / S3
-  ├── bronze/   ← copia fiel de la fuente en Parquet
-  ├── silver/   ← limpieza y variables derivadas       (Etapa 2, próxima fase)
-  └── gold/     ← dataset analítico para KPIs y modelo (Etapa 3)
-       │
-       │  TVF s3()
+RustFS / S3 (lake)
+  ├── bronze/        ← copia fiel de PostgreSQL en Parquet
+  ├── silver/        ← limpieza y variables derivadas (Iceberg)
+  ├── gold/          ← tablas analíticas para KPIs y modelo (Iceberg)
+  └── models/        ← modelo de riesgo (Spark ML) + checkpoint de features
+       │  catálogo Iceberg
        ▼
-  Apache Doris   ← base de datos analítica MPP
-       │
-       │  MySQL protocol
+Apache Doris         ← base analítica olist_bi (vistas sobre gold)
+       │  protocolo MySQL
        ▼
-  Apache Superset ← BI / Dashboard                     (Etapa 4)
+Apache Superset      ← dashboard "OLIST Logística"
 ```
 
-PySpark corre en modo `local[*]` dentro del contenedor Jupyter. RustFS es el object storage S3-compatible que actúa como lake. Doris y Superset no son necesarios para correr las notebooks de esta etapa.
+Spark corre como driver dentro del contenedor `jupyter` (más un cluster `spark-master` y
+`spark-worker`). MLflow registra los experimentos del modelo.
 
 ---
 
-## Prerequisitos
+## 1. Requisitos
 
-### 1. Stack de Etapa 1 levantado con datos cargados
+- **Docker** con Docker Compose v2 (`docker compose version`): Docker Desktop en macOS (Intel o
+  Apple Silicon) o Docker Engine en Linux.
+- **Memoria asignada a Docker: 12 GB o más** (Docker Desktop → Settings → Resources → Memory).
+  Doris, Spark y Superset corren al mismo tiempo.
+- **Disco libre: ~15 GB** (imágenes, jars y volúmenes).
+- En el host: `make`, `bash`, `curl` y `python3` (solo biblioteca estándar; se usa para
+  importar el dashboard). macOS y la mayoría de las distribuciones Linux ya los traen.
+- Conexión a internet la primera vez (descarga de imágenes y jars).
+- Puertos libres: 5432, 8030, 8083, 8084, 8088, 8889, 9002, 9003, 9030, 4042, 5050, 7078.
 
-Este stack necesita acceso a PostgreSQL con la base `olist_db` y el esquema `olist` completo ya creado y cargado. El stack de Etapa 1 debe estar corriendo antes de ejecutar cualquier notebook.
+## 2. Datos crudos
 
-```bash
-# Desde la raíz del proyecto: solo PostgreSQL
-docker compose up -d postgres
-docker compose stop jupyter   # el Jupyter de Etapa 1 usa el mismo puerto (8889) que el de Etapa 2
+Copiar los 9 CSV del dataset *Brazilian E-Commerce Public Dataset by Olist*
+(https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) en `data/raw/`, sin renombrarlos:
+
+```
+data/raw/
+├── olist_customers_dataset.csv
+├── olist_geolocation_dataset.csv
+├── olist_order_items_dataset.csv
+├── olist_order_payments_dataset.csv
+├── olist_order_reviews_dataset.csv
+├── olist_orders_dataset.csv
+├── olist_products_dataset.csv
+├── olist_sellers_dataset.csv
+└── product_category_name_translation.csv
 ```
 
-> Si se levanta todo el stack de Etapa 1 (`docker compose up -d` o `make up`), su Jupyter ocupa el
-> puerto 8889 y el Jupyter de Etapa 2 no puede arrancar. Alcanza con que corra `postgres`.
-
-Verificar que PostgreSQL responde:
-
-```bash
-docker compose exec postgres psql -U olist_admin -d olist_db -c "\dt olist.*"
-```
-
-Se deben ver las 10 tablas: `orders`, `order_items`, `order_payments`, `order_reviews`, `customers`, `sellers`, `products`, `category_translation`, `geo_cep`, `geolocation`.
-
-### 2. Variables de entorno
-
-Copiar el archivo de ejemplo de **esta carpeta** (`etapa2/.env.example`) y completar las credenciales:
-
-```bash
-cd etapa2
-cp .env.example .env
-```
-
-`POSTGRES_DB`, `POSTGRES_USER` y `POSTGRES_PASSWORD` deben ser **los mismos del `.env` de la raíz**
-(los de Etapa 1); la contraseña del ejemplo es solo ilustrativa. Para comprobar que coinciden sin
-mostrarla (los dos hashes deben ser iguales):
-
-```bash
-grep '^POSTGRES_PASSWORD=' .env    | cut -d= -f2- | shasum
-grep '^POSTGRES_PASSWORD=' ../.env | cut -d= -f2- | shasum
-```
-
-Las variables necesarias para este stack son:
-
-| Variable | Descripción |
-|---|---|
-| `RUSTFS_ACCESS_KEY` | Clave de acceso para RustFS (elegir libremente) |
-| `RUSTFS_SECRET_KEY` | Clave secreta para RustFS (mínimo 8 caracteres) |
-| `POSTGRES_DB` | Nombre de la base (`olist_db`) |
-| `POSTGRES_USER` | Usuario de PostgreSQL (`olist_admin`) |
-| `POSTGRES_PASSWORD` | Contraseña del usuario |
-
-### 3. Jars de Spark
-
-Ejecutar el script de descarga **una sola vez** antes de levantar el stack:
-
-```bash
-bash scripts/download_jars.sh
-```
-
-Funciona en Linux y en macOS (bash 3.2 incluido) y requiere `curl`. El script baja los 4 jars
-necesarios a `jars/` desde Maven Central:
-
-| Jar | Función |
-|---|---|
-| `hadoop-aws-3.4.2.jar` | Conector S3A para Hadoop 3.4.x |
-| `aws-sdk-bundle-v2-2.29.52.jar` | AWS SDK v2 (requerido por Hadoop 3.4.x) |
-| `iceberg-spark-runtime-4.1_2.13-1.11.0.jar` | Soporte Apache Iceberg |
-| `postgresql-42.7.4.jar` | Driver JDBC para PostgreSQL |
-
-Si los jars ya existen el script los detecta y los omite (idempotente). El directorio `jars/` se monta directamente en los contenedores Spark y Jupyter. Los jars están en `.gitignore` y no se versiona su contenido.
+Para comprobarlo: `make verificar-csv`.
 
 ---
 
-## Levantar el stack
+## 3. Ejecución completa (un solo comando)
 
 ```bash
-cd etapa2
-
-# Primera vez: construir la imagen de Jupyter
-docker compose build jupyter
-
-# Levantar todos los servicios
-docker compose up -d
+make todo
 ```
 
-Servicios que se levantan:
+Hace, en orden: crea `.env` desde `.env.example`, verifica los CSV, descarga los jars de Spark,
+construye las imágenes, levanta el stack, carga PostgreSQL, construye bronze, silver y gold,
+configura Doris, entrena el modelo, calcula el riesgo de los pedidos en curso e importa el
+dashboard.
 
-| Servicio | Puerto host | Descripción |
+Duración aproximada la primera vez: **1 a 1.5 horas**. La mayor parte es la notebook de
+entrenamiento (~40 min). Si se tiene el export del modelo ya entrenado, ver la sección 4.5,
+opción B, para saltar ese paso.
+
+> **Mensajes de error que no detienen el proceso.** Durante la ejecución, en especial en la
+> predicción (sección 4.5), Spark imprime muchos avisos `WARN`, algunos con un stack trace de
+> Java. Son normales y **hay que dejar que el proceso siga**; no cancelarlo. El proceso solo
+> falló si `make` termina con `make: *** [...] Error 1`. En ese caso se puede retomar desde el
+> paso que falló (sección 4) sin repetir los anteriores.
+
+Al terminar, abrir **http://localhost:8088** (usuario `admin`, contraseña `admin`) y el
+dashboard **OLIST Logística**.
+
+---
+
+## 4. Ejecución paso a paso
+
+Cada paso se puede correr por separado y volver a correr sin romper nada (idempotente).
+
+### 4.1 Levantar el stack
+
+```bash
+make up
+```
+
+Crea `.env` si no existe, verifica los CSV, descarga los jars a `jars/`, construye las imágenes
+`olist-jupyter:local` y `olist-superset:local` y levanta todos los servicios. La primera vez
+tarda varios minutos: Superset espera a que Doris esté sano (~3 min).
+
+Comprobar con `make ps`: todos los servicios deben estar `running` (Doris y PostgreSQL además
+`healthy`); `olist-rustfs-init` termina solo después de crear el bucket `olist`.
+
+### 4.2 Etapa 1: carga en PostgreSQL
+
+```bash
+make olist        # init → raw → olist
+make verificar-raw    # opcional: conteos por tabla
+```
+
+- `init`: extensión `pg_stat_statements`, esquemas, rol de solo lectura y base `mlflow_db`.
+- `raw`: carga los 9 CSV tal cual en el esquema `raw`.
+- `olist`: esquema tipado con PK/FK y comentarios (10 tablas, incluye `geo_cep`).
+
+### 4.3 Etapa 2: lake (bronze, silver, gold)
+
+```bash
+make bronze       # PostgreSQL → Parquet en s3a://olist/bronze/
+make silver       # limpieza → tablas Iceberg lake.silver
+make gold         # tablas analíticas → lake.gold
+make tests        # opcional: pruebas de calidad sobre silver y gold
+```
+
+### 4.4 Doris
+
+```bash
+make doris
+```
+
+Crea el catálogo Iceberg `lake` sobre RustFS, la base `olist_bi` con sus vistas y el usuario de
+solo lectura para Superset.
+
+### 4.5 Etapa 3: modelo de riesgo de atraso
+
+**Opción A — entrenar desde cero** (lo que hace `make todo`):
+
+```bash
+make prediccion
+```
+
+Equivale a:
+
+| Paso | Qué hace | Duración |
 |---|---|---|
-| `rustfs` | 9002 (API S3), 9003 (consola web) | Object storage |
-| `spark-master` | 8083 (UI), 7078 | Coordinador del cluster |
-| `spark-worker` | 8084 (UI) | Nodo de cómputo |
-| `jupyter` | 8889 (JupyterLab), 4042 (Spark UI) | Notebooks |
+| `make modelo-features` | Ejecuta `notebooks/etapa3/01_regresion_logistica.ipynb`: features, búsqueda de hiperparámetros, registro en MLflow y checkpoint `s3a://olist/checkpoints/df_features`. Deja la copia ejecutada en `notebooks/etapa3/01_regresion_logistica_ejecutado.ipynb`. | ~40 min |
+| `make modelo` | Entrena el modelo final y lo guarda en `s3a://olist/models/olist_tarde_logistica_v1`. | ~5 min |
+| `make riesgo` | Calcula el riesgo de los pedidos en curso al corte simulado (15/06/2018) → `lake.gold.riesgo_pedidos`. | ~2 min |
+| `make doris-riesgo` | Crea la vista `olist_bi.riesgo_pedidos` para el dashboard. | segundos |
 
-Verificar que todo levantó:
+> **Proceso largo y pesado.** La predicción es la etapa que más tiempo y cómputo consume:
+> calcula variables con ventanas sobre todo el historial de vendedores y ajusta decenas de
+> modelos en la búsqueda de hiperparámetros. Puede tardar de 30 minutos a más de una hora según
+> la máquina, con el CPU al máximo y varios GB de memoria ocupados. Conviene no correr otras
+> tareas pesadas mientras tanto y verificar que Docker tenga la memoria indicada en la sección 1.
+> Durante largos ratos la consola solo muestra el avance de los stages de Spark
+> (`[Stage 112:> (0 + 2) / 2]`); es normal. El avance se puede seguir en la UI de Spark
+> (http://localhost:4042) y en MLflow (http://localhost:5050).
+>
+> **Avisos esperados en esta etapa (no cancelar):**
+> - `FileNotFoundException: No such file or directory: s3a://olist/checkpoints/df_features`:
+>   la primera vez el checkpoint de features todavía no existe; la notebook lo detecta, calcula
+>   las features desde cero y lo guarda. En las siguientes ejecuciones lo reutiliza y salta ese
+>   cálculo.
+> - `QuantileDiscretizer: Some quantiles were identical`, `Failed to load implementation from:
+>   dev.ludovic.netlib.blas.JNIBLAS` y `Using standard FileOutputCommitter`: avisos
+>   informativos de Spark, sin efecto en el resultado.
+>
+> Si la notebook falla con `OutOfMemoryError`, subir la memoria de Docker y volver a correr
+> `make prediccion`: como el checkpoint ya quedó guardado, la segunda vez es mucho más rápida.
+
+**Opción B — usar el modelo ya entrenado** (archivo `prediccion_export.tar.gz`):
 
 ```bash
-docker compose ps
+make prediccion-rapida PREDICCION_EXPORT=/ruta/a/prediccion_export.tar.gz
 ```
+
+Carga el checkpoint y el modelo en RustFS y después corre `riesgo` y `doris-riesgo`. Si el
+archivo está en la raíz del repo no hace falta indicar `PREDICCION_EXPORT`.
+
+### 4.6 Dashboard
+
+```bash
+make dashboard-importar
+```
+
+Importa conexión, datasets, gráficos y dashboard desde `superset/olist_dashboard/` (YAML).
+Abrir http://localhost:8088 → Dashboards → **OLIST Logística**. Pestañas: Vista ejecutiva,
+Vista analítica, Vista de decisión, Vista predictiva, entre otras.
+
+La pestaña **Vista predictiva** necesita el paso 4.5; sin él sus gráficos muestran error.
 
 ---
 
-## Ejecutar las notebooks
+## 5. Servicios
 
-Las notebooks deben correrse **en orden**. Están en `notebooks/`.
+| Servicio | URL / puerto | Uso |
+|---|---|---|
+| Superset | http://localhost:8088 | Dashboard (admin / admin) |
+| JupyterLab | http://localhost:8889 | Notebooks (`notebooks/`) |
+| MLflow | http://localhost:5050 | Experimentos del modelo |
+| Consola RustFS | http://localhost:9003 | Explorar el lake (credenciales `RUSTFS_*` de `.env`) |
+| Spark master UI | http://localhost:8083 | Estado del cluster |
+| Doris (MySQL) | localhost:9030 | `mysql -h 127.0.0.1 -P 9030 -uroot` |
+| PostgreSQL | localhost:5432 | Usuario y contraseña `POSTGRES_*` de `.env` |
 
-### Paso 1 — ETL Bronze: `etapa2_bronze_etl.ipynb`
-
-Lee las 10 tablas del esquema `olist` desde PostgreSQL y las escribe como Parquet en `s3a://olist/bronze/`.
-
-Abrir en JupyterLab: http://localhost:8889
-
-O ejecutar sin interfaz:
-
-```bash
-docker compose exec -T jupyter bash -c "
-  cd /home/notebooks &&
-  jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.timeout=600 \
-    etapa2_bronze_etl.ipynb
-"
-```
-
-Al finalizar, la celda de verificación debe mostrar `✓` para las 10 tablas y un total de ~58 MB en el bucket.
-
-### Paso 2 — EDA: `etapa2_eda.ipynb`
-
-Lee los Parquet de la capa bronze directamente desde RustFS con PySpark y realiza el análisis exploratorio.
+## 6. Detener y reiniciar
 
 ```bash
-docker compose exec -T jupyter bash -c "
-  cd /home/notebooks &&
-  jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.timeout=300 \
-    etapa2_eda.ipynb
-"
+make down     # detiene los contenedores; los datos se conservan en los volúmenes
+make up       # vuelve a levantar; no hace falta repetir la carga
+make clean    # borra contenedores y TODOS los volúmenes (PostgreSQL, lake, Doris, Superset)
 ```
 
-> **Prerequisito:** el bucket `olist/bronze/` debe existir (paso 1 completado).
+Después de `make clean` hay que repetir todo desde la sección 3 o 4.
 
----
+## 7. Estructura del repositorio
 
-## Notas importantes
+```
+docker-compose.yml        stack completo
+Makefile                  todos los pasos (make <target>)
+.env.example              variables de entorno (se copia a .env)
+data/raw/                 CSV de Olist (no se versionan)
+docker/                   Dockerfiles de jupyter y superset, arranque de MLflow
+sql/00_init, 01_raw, 02_olist   carga en PostgreSQL (Etapa 1)
+sql/doris/                catálogo, vistas y usuario en Doris
+src/pipeline/             jobs Spark: silver, gold, pruebas
+src/modelo/               features, entrenamiento y evaluación del modelo
+lib/sparkstats/           utilidades estadísticas sobre PySpark (usadas por el modelo)
+scripts/                  carga de jars, entrenamiento, scoring, import/export del dashboard
+notebooks/                EDA (Etapa 2) y modelo (etapa3/)
+superset/olist_dashboard/ dashboard en YAML (fuente de verdad)
+docs/                     diccionario de datos y definición de KPIs (kpis.yaml)
+```
 
-**Versiones:** la imagen de Jupyter instala `pyspark==4.1.3` para que coincida con el JVM de la imagen base `apache/spark:4.1.3-python3`. No actualizar pyspark vía pip sin actualizar también la imagen base; el mismatch de versiones rompe el API de plotting nativo y otras llamadas Py4J.
+## 8. Problemas comunes
 
-**Red:** el contenedor Jupyter está conectado a dos redes: `etapa2_net` (acceso a RustFS y Spark) y `tp-olist_olist_net` (acceso a PostgreSQL de Etapa 1 por nombre de servicio `postgres`). El stack de Etapa 1 debe estar corriendo para que esa red exista.
-
-**Persistencia:** los datos del lake (Parquet en RustFS) se guardan en el volumen Docker `etapa2_rustfs_etapa2`. Sobreviven a `docker compose down`. Solo se pierden con `docker compose down -v`.
-
-**Plotting en PySpark:** la API nativa `df.plot.bar(...)` usa plotly como backend. Requiere que plotly esté instalado (incluido en `requirements.txt`) y que las versiones de pyspark Python y JVM coincidan.
-
-**Idempotencia:** el ETL bronze usa `mode('overwrite')`, por lo que puede correrse múltiples veces sin problema.
-
----
-
-## Bajar el stack
+**Doris no arranca o se queda en "wait catalog to be ready".** La primera vez tarda hasta
+~3 min; ver el avance con `docker compose logs -f doris`. El compose le fija la IP para que no
+cambie entre reinicios. Si aun así queda trabado, borrar solo sus volúmenes y repetir
+`make doris` y los pasos siguientes:
 
 ```bash
-docker compose down          # detiene y elimina contenedores, conserva el volumen de RustFS
-docker compose down -v       # también elimina el volumen (borra todos los Parquet del lake)
+docker compose stop doris superset
+docker compose rm -f doris
+docker volume rm olist_doris_fe_meta olist_doris_be_data
+make up doris doris-riesgo
 ```
+
+**Error de subred al levantar** (`Pool overlaps with other one on this address space`): otra red
+de Docker usa `10.89.40.0/24`. Cambiar la subred y la IP de Doris en `docker-compose.yml`.
+
+**Un puerto ya está ocupado.** Detener el programa que lo usa o cambiar el puerto del lado del
+host en `docker-compose.yml` (el número a la izquierda de `:`).
+
+**Contenedores que se reinician o Spark sin memoria.** Subir la memoria asignada a Docker
+(sección 1).
+
+**Superset muestra errores en la Vista predictiva.** Falta el paso 4.5.
+
+**Los mapas no muestran el mapa base.** Requieren un token de Mapbox en `MAPBOX_API_KEY`
+(`.env`); los datos se ven igual sin él.
+
+## 9. Notas técnicas
+
+- **Versiones:** la imagen de Jupyter parte de `apache/spark:4.1.3-python3` e instala
+  `pyspark==4.1.3`; deben coincidir (un mismatch rompe llamadas Py4J). Los jars de Iceberg y
+  S3A son para Spark 4.1 / Scala 2.13. Superset está fijo en 6.1.0, la versión con la que se
+  exportó el dashboard.
+- **Cambios al dashboard:** editar en Superset, luego `make dashboard-exportar` y revisar el
+  diff de `superset/olist_dashboard/`.
+- **Verificación del dashboard (opcional):** `make referencia_kpis` y después `make verificar`.

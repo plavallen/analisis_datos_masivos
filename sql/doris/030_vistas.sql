@@ -18,13 +18,6 @@ SELECT * FROM lake.gold.vendedores;
 CREATE VIEW IF NOT EXISTS ciudades_mapa AS
 SELECT * FROM lake.gold.ciudades_mapa;
 
-DROP VIEW IF EXISTS descomposicion_mes;
-CREATE VIEW descomposicion_mes AS
-SELECT d.*,
-    ROUND(s.n_tardios * 1.0 / NULLIF(s.n_entregados, 0), 6) AS tasa_tardios
-FROM lake.gold.descomposicion_mes d
-LEFT JOIN serie_mensual s ON d.mes = s.anio_mes;
-
 CREATE VIEW IF NOT EXISTS promesa_ruta AS
 SELECT * FROM lake.gold.promesa_ruta;
 
@@ -68,3 +61,12 @@ SELECT
 FROM lake.gold.pedidos
 WHERE en_periodo_util = TRUE
 GROUP BY fecha_compra;
+
+-- Va después de serie_mensual porque la usa: Doris valida que exista al crear la vista
+-- (en una instalación limpia fallaba con "Unknown table 'serie_mensual'").
+DROP VIEW IF EXISTS descomposicion_mes;
+CREATE VIEW descomposicion_mes AS
+SELECT d.*,
+    ROUND(s.n_tardios * 1.0 / NULLIF(s.n_entregados, 0), 6) AS tasa_tardios
+FROM lake.gold.descomposicion_mes d
+LEFT JOIN serie_mensual s ON d.mes = s.anio_mes;

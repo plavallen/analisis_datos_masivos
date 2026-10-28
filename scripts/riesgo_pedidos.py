@@ -10,10 +10,10 @@ Columnas de salida:
   riesgo_relativo, riesgo_num, version_modelo, fecha_corte
 
 Uso desde el contenedor jupyter:
-  python3 /home/notebooks/../../../scripts/riesgo_pedidos.py
+  python3 /repo/scripts/riesgo_pedidos.py
 O bien desde el host:
-  docker compose -f etapa2/docker-compose.yml exec jupyter \
-    python3 /home/notebooks/etapa3/../../../scripts/riesgo_pedidos.py
+  docker compose exec jupyter \
+    python3 /repo/scripts/riesgo_pedidos.py
 """
 
 import os, sys
@@ -32,7 +32,7 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 # sparkstats y modelo deben estar en el path para cargar el PipelineModel
-for _p in ["/repo/etapa2/lib/sparkstats/src", "/repo/etapa2/src"]:
+for _p in ["/repo/lib/sparkstats/src", "/repo/src"]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 

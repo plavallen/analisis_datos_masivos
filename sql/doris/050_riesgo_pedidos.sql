@@ -1,6 +1,6 @@
 -- Vista de la predicción de riesgo de atraso para Superset (dataset riesgo_pedidos).
 -- Va aparte de 030_vistas.sql porque lake.gold.riesgo_pedidos solo existe después
--- del scoring (etapa2/scripts/riesgo_pedidos.py); Doris valida la tabla al crear la vista.
+-- del scoring (scripts/riesgo_pedidos.py); Doris valida la tabla al crear la vista.
 -- Se aplica con: make doris-riesgo
 --
 -- PROVISIONAL: semana_prometida se define como el lunes de la semana de fecha_prometida

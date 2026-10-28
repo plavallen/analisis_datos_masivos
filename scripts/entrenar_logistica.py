@@ -6,14 +6,14 @@ Uso:
     spark-submit \\
         --master spark://spark-master:7077 \\
         --jars /opt/spark/extra-jars/iceberg-spark-runtime-4.1_2.13-1.11.0.jar,... \\
-        /repo/etapa2/scripts/entrenar_logistica.py
+        /repo/scripts/entrenar_logistica.py
 """
 
 import sys
 import os
 
-sys.path.insert(0, '/repo/etapa2/src')
-sys.path.insert(0, '/repo/etapa2/lib/sparkstats/src')
+sys.path.insert(0, '/repo/src')
+sys.path.insert(0, '/repo/lib/sparkstats/src')
 
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F

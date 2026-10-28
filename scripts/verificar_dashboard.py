@@ -91,7 +91,7 @@ DORIS_QUERIES = {
 
 def doris_query(q):
     r = subprocess.run(
-        ["docker", "compose", "-f", "etapa2/docker-compose.yml",
+        ["docker", "compose",
          "exec", "-T", "doris",
          "mysql", "-u", "root", "-P", "9030", "-h", "127.0.0.1",
          "--skip-column-names", "-e", q],
@@ -435,7 +435,7 @@ def main():
         "ORDER BY mes"
     )
     r_decomp = subprocess.run(
-        ["docker", "compose", "-f", "etapa2/docker-compose.yml",
+        ["docker", "compose",
          "exec", "-T", "doris",
          "mysql", "-u", "root", "-P", "9030", "-h", "127.0.0.1",
          "--skip-column-names", "-e", decomp_q],
@@ -461,7 +461,7 @@ def main():
         "GROUP BY mes ORDER BY mes"
     )
     r_comp = subprocess.run(
-        ["docker", "compose", "-f", "etapa2/docker-compose.yml",
+        ["docker", "compose",
          "exec", "-T", "doris",
          "mysql", "-u", "root", "-P", "9030", "-h", "127.0.0.1",
          "-e", comprobacion_q],
@@ -497,7 +497,7 @@ def main():
 # ── Playwright browser check ──────────────────────────────────────────────────
 
 PLAYWRIGHT_VENV = os.path.join(
-    os.path.dirname(__file__), "..", "etapa2", ".playwright_venv"
+    os.path.dirname(__file__), "..", ".playwright_venv"
 )
 SCREENSHOT_DIR = "mediciones/etapa4/verificacion"
 DASH_URL = f"{SUPERSET_URL}/superset/dashboard/olist/"

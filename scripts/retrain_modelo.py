@@ -10,13 +10,13 @@ El checkpoint de features (ya computado) se usa como fuente de datos,
 por lo que el entrenamiento es solo el fitting del pipeline (~2-5 min).
 
 Uso:
-    docker compose -f etapa2/docker-compose.yml exec jupyter \
-        python3 /repo/etapa2/scripts/retrain_modelo.py
+    docker compose exec jupyter \
+        python3 /repo/scripts/retrain_modelo.py
 """
 
 import sys, os
-sys.path.insert(0, "/repo/etapa2/src")
-sys.path.insert(0, "/repo/etapa2/lib/sparkstats/src")
+sys.path.insert(0, "/repo/src")
+sys.path.insert(0, "/repo/lib/sparkstats/src")
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
